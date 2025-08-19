@@ -225,6 +225,7 @@ func connect(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		sess.Stderr = os.Stderr
+		_ = sess.Setenv("LANG", "C.UTF-8")
 		_ = sess.Setenv("COLORTERM", "truecolor")
 		if err = sess.RequestPty("xterm-256color", 80, 40, nil); err != nil {
 			_ = checkInWS(c, &mutex, -99, err)
@@ -235,7 +236,7 @@ func connect(w http.ResponseWriter, r *http.Request) {
 		if string(shell) == "" {
 			err = sess.Shell()
 		} else {
-			err = sess.Start("tmux attach")
+			err = sess.Start(string(shell))
 		}
 		if err != nil {
 			_ = checkInWS(c, &mutex, -99, err)

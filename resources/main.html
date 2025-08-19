@@ -4,8 +4,15 @@
 <title>WebShuSH</title>
 <link rel=stylesheet href="/resources/deps/xterm.css"
 	integrity="sha384-LJcOxlx9IMbNXDqJ2axpfEQKkAYbFjJfhXexLfiRJhjDU81mzgkiQq8rkV0j6dVh" />
+<script nonce="{{.Nonce}}">
+	// Temporarily hide Macs from xtermjs loading to avoid it forcing Mac-style controls.
+	// See: https://github.com/xtermjs/xterm.js/issues/4329
+	_plt = navigator.platform
+	navigator.__defineGetter__('platform', () => _plt.indexOf('Mac') == 0 ? 'nixLinux' : _plt)
+</script>
 <script src="/resources/deps/xterm.js"
 	integrity="sha384-/nfmYPUzWMS6v2atn8hbljz7NE0EI1iGx34lJaNzyVjWGDzMv+ciUZUeJpKA3Glc"></script>
+<script nonce="{{.Nonce}}">navigator.__defineGetter__('platform', () => _plt)</script>
 <script src="/resources/deps/xterm-addon-fit.js"
 	integrity="sha384-AQLWHRKAgdTxkolJcLOELg4E9rE89CPE2xMy3tIRFn08NcGKPTsELdvKomqji+DL"></script>
 <style nonce="{{.Nonce}}">
@@ -203,6 +210,15 @@
 		}
 	})
 
+	const theme = {
+		"background": "#181818", "foreground": "#d8d8d8", "cursorAccent": "#181818",
+		"cursor": "#d8d8d8", "black": "#181818", "red": "#ac4242", "green": "#90a959",
+		"yellow": "#f4bf75", "blue": "#6a9fb5", "magenta": "#aa759f", "cyan": "#75b5aa",
+		"white": "#d8d8d8", "brightBlack": "#6b6b6b", "brightRed": "#c55555",
+		"brightGreen": "#aac474", "brightYellow": "#feca88", "brightBlue": "#82b8c8",
+		"brightMagenta": "#c28cb8", "brightCyan": "#93d3c3", "brightWhite": "#f8f8f8"
+	}
+
 	/**
 	* Interface for all operations interacting with the server and server.
 	* Securely manages server connection, with login and session management,
@@ -225,7 +241,11 @@
 				}
 				connectedCallback() {
 					const terminal = this.shadowRoot.getElementById("render")
-					const term = new Terminal({fontFamily: terminal.style.fontFamily, fontSize: 12})
+					const term = new Terminal({
+						fontFamily: terminal.style.fontFamily,
+						fontSize: 12,
+						theme: theme
+					})
 					const fitTerm = new window.FitAddon.FitAddon()
 					term.loadAddon(fitTerm)
 					term.open(terminal)
@@ -253,7 +273,7 @@
 
 
 
-						return false
+						//return false
 					})
 					// Start streaming terminal input etc.
 					term.onData(d => {stThis.#ws.send(new Blob([d]))})
