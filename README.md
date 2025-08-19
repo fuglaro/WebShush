@@ -1,3 +1,12 @@
+# TODO
+* Update this file to be WebShuSH
+* Clear out other files/tests from filet-cloud days
+* Respect browser view zoon for terminal font by detecting browser shortcuts.
+* Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
+* Implement kitty control sequence protocol https://sw.kovidgoyal.net/kitty/keyboard-protocol/ (e.g: Alt+Arrows and esp. Alt+Tab)
+
+
+
 # ⛅ Filet Cloud
 A simple and powerful personal cloud storage solution, with an elegant web interface.
 
