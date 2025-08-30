@@ -10,7 +10,7 @@
 
 ![](favicon.ico)
 
-# 🖥 WebShuSH
+#  WebShuSH
 
 A simple and powerful SSH portal to access your hosts through the web.
 
