@@ -1,5 +1,4 @@
 # TODO
-* Login screengrab.
 * Copy and Paste:
   * Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
   * Copy and paste buffer length issues? Tmux.
@@ -108,7 +107,7 @@ so the aim is that a security audit, for whosoever wishes to do it, should be as
 Nothing is secure until it is audited and reviewed by peers.
 
 # Wish List for Future Work
-* Implement the Kitty Control Sequence Protocol https://sw.kovidgoyal.net/kitty/keyboard-protocol/ as a xtermjs addon.
+* Kitty Control Sequence Protocol addon (https://sw.kovidgoyal.net/kitty/keyboard-protocol).
 
 # Thanks to
 We stand on the shoulders of giants. They own this, far more than I do.
