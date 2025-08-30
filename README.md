@@ -12,7 +12,7 @@
 
 #  WebShuSH
 
-A simple and powerful SSH portal to access your hosts through the web.
+The simple and powerful SSH portal to access your hosts through the web.
 
 ![](demo-login.jpg)
 
