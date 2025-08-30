@@ -9,11 +9,11 @@
   * Force selection in the terminal on macOS (https://github.com/xtermjs/xterm.js/issues/4329).
 * Replace over the old WebShuSH
 
-# 🖥 WebShuSH
-
 ![](favicon.ico)
 
-A simple and powerful SSH portal for access to your hosts via the web.
+# 🖥 WebShuSH
+
+A simple and powerful SSH portal to access your hosts through the web.
 
 ![](demo-login.jpg) ![](demo-term.jpg)
 
