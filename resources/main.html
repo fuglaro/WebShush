@@ -139,6 +139,10 @@
 					<input type=text id=host name=host value=localhost required />
 				</li>
 				<li>
+					<label for=hostkey>hostkey</label>
+					<input type=text id=hostkey name=hostkey />
+				</li>
+				<li>
 					<label for=shell>shell</label>
 					<input type=text id=shell name=shell placeholder=default />
 				</li>
@@ -176,32 +180,63 @@
 			}
 			// Hook up the login form submission process.
 			this.shadowRoot.querySelector("form").addEventListener("submit", e => {
-				// Save form (safe) connection parameters to url.
-				this.shadowRoot.querySelectorAll("input").forEach(i => {
+				// Saving updated form (safe) connection parameters to url.
+				const saveURL = () => this.shadowRoot.querySelectorAll("input").forEach(i => {
 					if (i.id == "CSRFToken") return
 					if (i.id == "password") return
 					if (i.id == "code") return
 					var url = new URL(window.location)
 					url.searchParams.set(i.name, i.value)
-					window.history.replaceState("", "", url.href)
+					window.history.pushState("", "", url.href)
 				})
+				saveURL()
 				this.shadowRoot.querySelector("button").classList.add("loading")
 				e.preventDefault()
 				// Establish WebSocket connection.
 				fetch("/preconnect").then(() => {
 					const ws = new WebSocket(`wss://${window.location.host}/connect`)
-					ws.onclose = () => location.reload(true)
-					ws.onerror = () => ws.close()
-					ws.onopen = () => {
+					var hostkeyfail = null
+					// Process all websocket events in an ordered background queue.
+					let msgQueue = Promise.resolve()
+					const handshake = new Promise(ok => {
+						const onmessage = async m => {
+							const keyfield = this.shadowRoot.querySelector("#hostkey")
+							const realkey = JSON.parse(m.data)
+							if (realkey == "") {
+								hostkeyfail = true
+								ws.close()
+							} else if (keyfield.value == "") keyfield.value = realkey
+							ok()
+						}
+						ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m))
+					})
+					const onclose = async () => {
+						if (hostkeyfail) await warn(
+							"⚠️ WARNING ⚠️\n" +
+							"REMOTE HOST IDENTIFICATION HAS CHANGED!\n\n" +
+							"IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
+							"Host key verification failed.\n" +
+							"Someone could be eavesdropping on you right now\n" +
+							"(with an adversary-in-the-middle attack)!\n" +
+							"It is also possible that a host key has just been changed.")
+						location.reload(true)
+					}
+					ws.onclose = () => msgQueue = msgQueue.then(() => onclose())
+					ws.onerror = () => msgQueue = msgQueue.then(() => onclose())
+					// Process login flow and handshake.
+					ws.onopen = async () => {
 						// Authenticate WebSocket connection.
 						ws.send(this.shadowRoot.querySelector("#CSRFToken").value)
 						ws.send(this.shadowRoot.querySelector("#username").value)
 						ws.send(this.shadowRoot.querySelector("#password").value)
 						ws.send(this.shadowRoot.querySelector("#code").value)
 						ws.send(this.shadowRoot.querySelector("#host").value)
+						ws.send(this.shadowRoot.querySelector("#hostkey").value)
 						ws.send(this.shadowRoot.querySelector("#shell").value)
+						await handshake
+						saveURL()
 						// Give connection to the server API.
-						server.connect(ws)
+						if (!hostkeyfail) server.connect(ws)
 					}
 					document.body.removeChild(document.querySelector("login-form"))
 				}).catch(() => location.reload())
@@ -266,11 +301,11 @@
 						else term.write(m)
 					}
 					term.attachCustomKeyEventHandler(e => {
-						console.log(e)
 						const mods = ((e.shiftKey ? 1 : 0) | (e.altKey ? 2 : 0) |
 							(e.ctrlKey ? 4 : 0) | (e.metaKey ? 8 : 0))
 
-
+						// XXX TODO clear this out custom handler if not used in this 2025 dev cycle.
+						console.log(e)
 
 
 						//return false
@@ -319,4 +354,55 @@
 		}
 	}
 	const server = new Server();
+</script>
+
+<!--
+	-- warn
+	--
+	-- Pop-up prompt for warnings.
+	-->
+<style nonce="{{.Nonce}}">
+	.pop {
+		position: fixed;
+		z-index: 99;
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+		background-color: rgba(255, 255, 255, 0.2);
+		width: 100vw;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		white-space: pre-line;
+	}
+
+	.pop button {
+		font-size: 1.6em;
+		border-style: solid;
+		border-color: currentColor;
+		float: right;
+		margin: 5px;
+		background-color: background;
+	}
+</style>
+<template id=prompt>
+	<div class=pop>
+		<h1></h1>
+		<p></p>
+		<button id=ok>OK</button>
+	</div>
+</template>
+<script nonce="{{.Nonce}}">
+	"use strict"
+	async function warn(msg) {
+		const el = document.getElementById("prompt").content.cloneNode(true).querySelector(".pop")
+		el.querySelector("h1").textContent = msg.substr(0, msg.indexOf("\n"))
+		el.querySelector("p").textContent = msg.substr(msg.indexOf("\n") + 1)
+		document.body.appendChild(el)
+		el.querySelector("#ok").focus()
+		await new Promise(ok => el.querySelector("#ok").onclick = () => ok())
+		document.body.removeChild(el)
+	}
 </script>

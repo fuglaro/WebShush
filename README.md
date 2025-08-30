@@ -1,14 +1,19 @@
 # TODO
-* Capture and store, in the url and form, the hostkey and update in SECURITY.
-* Better banner image. Snazzified login and terminal demo screen.
-* Clear out other files/tests from filet-cloud days
-* Update favicon
-* Trim the security info to be relevant (from filet-cloud days).
-* Respect browser view zoom for terminal font by detecting browser shortcuts.
-* Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
-* Check browser credential storage works right across different hosts - understand navigator.credentials
+* Store the hostname in the main url endpoint part.
+* Back button could refill form from url values.
+* Check browser credential storage works right across different hosts - understand navigator.credentials - maybe store hostkey in this?
+* Copy and Paste:
+  * Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
+  * Copy and paste buffer length issues? Tmux.
+  * Copy and past buffer auto strip space at end of lines.
+  * Support requests the clipboard from the client using the xterm(1) escape sequence (see tmux).
+  * Support Shift+Drag for terminal text selection (overriding passing mouse events) consistenly across client OSs, similar to Alacritty, with a new xtermjs option.
+  * Force selection in the terminal on macOS (https://github.com/xtermjs/xterm.js/issues/4329).
+* Replace over the old WebShuSH
 
 # 🖥 WebShuSH
+
+![](favicon.ico)
 
 A simple and powerful SSH portal for access to your hosts via the web.
 
@@ -19,10 +24,12 @@ A simple and powerful SSH portal for access to your hosts via the web.
 * 📌 Connection parameters automatically saved in the URL.
 * 🤓 Nerd Font icons (Noto Mono Nerd Font).
 * 🎨 Alacritty's beautiful color theme.
-* 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
-* 🌏 Access from Firefox, Safari, Chrome, and other Chromium based browsers.
 * 💪 Hardened security.
-* 🎁 Self contained executable.
+* 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
+* 🔑 Supports Strict Host Key Checking.
+* 🎁 Self contained single-file executable.
+* 🌏 Access from Firefox, Safari, Chrome, and other Chromium based browsers.
+* ⌘ Richer terminal keyboard controls from a mac (than xtermjs' defaults).
 * 🐎 Lightweight and fast.
 
 ### Build
@@ -97,10 +104,6 @@ Nothing is secure until it is audited and reviewed by peers.
 
 # Wish List for Future Work
 * Implement the Kitty Control Sequence Protocol https://sw.kovidgoyal.net/kitty/keyboard-protocol/ as a xtermjs addon.
-* Improve CSP protection to inline stylesheets when xterm.js supports it. Other renderers or alternate tools could be options. See https://github.com/xtermjs/xterm.js/issues/4445
-* Support Shift+Drag for terminal text selection (overriding passing mouse events) consistenly across client OSs, similar to Alacritty, with a new xtermjs option.
-* Force selection in the terminal on macOS (https://github.com/xtermjs/xterm.js/issues/4329).
-* Reduce complexity through more consistent behaviour of major browsers.
 
 # Thanks to
 We stand on the shoulders of giants. They own this, far more than I do.

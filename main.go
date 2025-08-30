@@ -11,6 +11,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -166,11 +167,29 @@ func connect(w http.ResponseWriter, r *http.Request) {
 	if !strings.Contains(hostname, ":") {
 		hostname += ":22"
 	}
+	_, hostkey, err := c.ReadMessage()
+	if checkInWS(c, &mutex, -99, err) {
+		return
+	}
 	_, shell, err := c.ReadMessage()
 	if checkInWS(c, &mutex, -99, err) {
 		return
 	}
 	var codeUsed = false
+	hostKeyManager := func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+		realkey := base64.StdEncoding.EncodeToString(key.Marshal())
+		if string(hostkey) != "" && string(hostkey) != realkey {
+			if c.WriteJSON("") != nil {
+				return fmt.Errorf("Bad Host Key Error Send Failure")
+			}
+			return fmt.Errorf("Bad Host Key")
+		}
+		if c.WriteJSON(realkey) != nil {
+			return fmt.Errorf("Host Key Send Failure")
+		}
+
+		return nil
+	}
 	sshConn, err := ssh.Dial("tcp", hostname, &ssh.ClientConfig{
 		User: string(user),
 		Auth: []ssh.AuthMethod{
@@ -187,7 +206,7 @@ func connect(w http.ResponseWriter, r *http.Request) {
 					return answ, nil
 				}),
 			ssh.Password(string(pass))},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		HostKeyCallback: hostKeyManager,
 	})
 	if checkInWS(c, &mutex, -99, err) {
 		return
@@ -392,7 +411,7 @@ VERSION: ` + version + "\n")
 
 	// Redirect HTTP to HTTPS.
 	go func() {
-		log.Fatal(http.ListenAndServe(":8080",
+		log.Println(http.ListenAndServe(":8080",
 			SMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				redirect := "https://" + strings.Split(r.Host, ":")[0]
 				if strings.Contains(addr, ":") {
