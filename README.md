@@ -1,6 +1,4 @@
 # TODO
-* Store the hostname in the main url endpoint part.
-* Back button could refill form from url values.
 * Check browser credential storage works right across different hosts - understand navigator.credentials - maybe store hostkey in this?
 * Copy and Paste:
   * Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
@@ -10,6 +8,7 @@
   * Support Shift+Drag for terminal text selection (overriding passing mouse events) consistenly across client OSs, similar to Alacritty, with a new xtermjs option.
   * Force selection in the terminal on macOS (https://github.com/xtermjs/xterm.js/issues/4329).
 * Replace over the old WebShuSH
+* Login screengrab.
 
 # 🖥 WebShuSH
 
@@ -18,18 +17,18 @@
 A simple and powerful SSH portal for access to your hosts via the web.
 
 ## Features
-* 👤 Simple login screen compatible with browser credentials management.
-* 🖥 Choose any shell to launch into.
-* 🔗Automatically reconnect to sessions, e.g: shell=`tmux attach || tmux`
-* 📌 Connection parameters automatically saved in the URL.
+* 👤 Simple login screen.
+* 🖥 Launch shell customization.
+* 🔗Supports session reconnection (set shell to `tmux attach || tmux`).
+* 📌 Automatic connection parameter saving (into URL for bookmarking).
 * 🤓 Nerd Font icons (Noto Mono Nerd Font).
-* 🎨 Alacritty's beautiful color theme.
+* 🎨 Beautiful Alacritty color theme.
 * 💪 Hardened security.
-* 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
 * 🔑 Supports Strict Host Key Checking.
+* 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
+* 🔏 Compatible with browser credentials managgement.
 * 🎁 Self contained single-file executable.
 * 🌏 Access from Firefox, Safari, Chrome, and other Chromium based browsers.
-* ⌘ Richer terminal keyboard controls from a mac (than xtermjs' defaults).
 * 🐎 Lightweight and fast.
 
 ### Build

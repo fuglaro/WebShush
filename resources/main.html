@@ -173,22 +173,31 @@
 		}
 		connectedCallback() {
 			if (!this.shadowRoot) return
-			// Update the form with URL parameter info on load.
-			for (const [key, value] of new URL(window.location).searchParams.entries()) {
-				const el = this.shadowRoot.querySelector("#" + key)
-				if (el && el.nodeName == "INPUT") el.value = value
+			const loadURL = url => {
+				// Update the form with URL parameter info on load.
+				for (const [key, value] of new URL(url).searchParams.entries()) {
+					const el = this.shadowRoot.querySelector("#" + key)
+					if (el && el.nodeName == "INPUT") el.value = value
+				}
 			}
+			window.onpopstate = (e) => loadURL(e.state)
+			loadURL(window.location)
 			// Hook up the login form submission process.
 			this.shadowRoot.querySelector("form").addEventListener("submit", e => {
 				// Saving updated form (safe) connection parameters to url.
-				const saveURL = () => this.shadowRoot.querySelectorAll("input").forEach(i => {
-					if (i.id == "CSRFToken") return
-					if (i.id == "password") return
-					if (i.id == "code") return
+				const saveURL = () => {
 					var url = new URL(window.location)
-					url.searchParams.set(i.name, i.value)
-					window.history.pushState("", "", url.href)
-				})
+					this.shadowRoot.querySelectorAll("input").forEach(i => {
+						if (i.id == "CSRFToken") return
+						if (i.id == "password") return
+						if (i.id == "code") return
+						url.searchParams.set(i.name, i.value)
+					})
+					if (window.location != url.href) {
+						console.log("PUSHING")
+						window.history.pushState(url.href, "", url.href)
+					}
+				}
 				saveURL()
 				this.shadowRoot.querySelector("button").classList.add("loading")
 				e.preventDefault()
