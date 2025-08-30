@@ -342,35 +342,37 @@ func connect(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Handle options.
-	if p := os.Getenv("FC_SSH_PORT"); p != "" {
+	if p := os.Getenv("WEBSHUSH_SSH_PORT"); p != "" {
 		sshport = p
 	}
-	addr := os.Getenv("FC_LISTEN")
+	addr := os.Getenv("WEBSHUSH_LISTEN")
 	if addr == "" {
 		addr = ":443"
 	}
-	cert := os.Getenv("FC_CERT_FILE")
-	key := os.Getenv("FC_KEY_FILE")
-	domain := os.Getenv("FC_DOMAIN")
+	cert := os.Getenv("WEBSHUSH_CERT_FILE")
+	key := os.Getenv("WEBSHUSH_KEY_FILE")
+	domain := os.Getenv("WEBSHUSH_DOMAIN")
 	if domain == "" && (cert == "" || key == "") {
 		fmt.Print(`
-filet-cloud: The lean and powerful 💪 personal cloud ⛅.
+webshush: The lean and powerful 💪 personal cloud ⛅.
 
-Usage (environment variables):
+Usage:
+  WEBSHUSH_CERT_FILE=my.crt WEBSHUSH_KEY_FILE=my.key webshush
 
-  FC_CERT_FILE:
-  FC_KEY_FILE:
+Environment Variables:
+  WEBSHUSH_CERT_FILE:
+  WEBSHUSH_KEY_FILE:
     The credentials to use for TLS connections.
-  FC_DOMAIN:
+  WEBSHUSH_DOMAIN:
     The domain to use with the included Let's Encrypt integration.
     Use of this implies acceptance of the LetsEncrypt Terms of Service.
-  FC_LISTEN:
+  WEBSHUSH_LISTEN:
     The address to listen on. Defaults to :443.
 
 This service can only be served over HTTPS connections, requiring
-either FC_CERT_FILE and FC_KEY_FILE to be specified, or,
+either WENSHUSH_CERT_FILE and WEBSHUSH_KEY_FILE to be specified, or,
 if you accept the LetsEncrypt Terms of Service, you can use the
-automatic LetsEncrypt configuration by specifying FC_DOMAIN.
+automatic LetsEncrypt configuration by specifying WEBSHUSH_DOMAIN.
 
 VERSION: ` + version + "\n")
 		return
@@ -504,12 +506,12 @@ VERSION: ` + version + "\n")
 	http.Handle("/favicon.ico", SMW(http.FileServerFS(res)))
 
 	// Display final configuration information and then launch service.
-	fmt.Fprintf(os.Stderr, "FC_CERT_FILE=%v\n", cert)
-	fmt.Fprintf(os.Stderr, "FC_KEY_FILE=%v\n", key)
-	fmt.Fprintf(os.Stderr, "FC_DOMAIN=%v\n", domain)
-	fmt.Fprintf(os.Stderr, "FC_LISTEN=%v\n", addr)
+	fmt.Fprintf(os.Stderr, "WEBSHUSH_CERT_FILE=%v\n", cert)
+	fmt.Fprintf(os.Stderr, "WEBSHUSH_KEY_FILE=%v\n", key)
+	fmt.Fprintf(os.Stderr, "WEBSHUSH_DOMAIN=%v\n", domain)
+	fmt.Fprintf(os.Stderr, "WEBSHUSH_LISTEN=%v\n", addr)
 	fmt.Fprintf(os.Stderr, "\nListening...\n")
-	if os.Getenv("FC_DOMAIN") != "" {
+	if os.Getenv("WEBSHUSH_DOMAIN") != "" {
 		log.Fatal(http.Serve(autocert.NewListener(domain), nil))
 	} else {
 		log.Fatal(http.ListenAndServeTLS(addr, cert, key, nil))

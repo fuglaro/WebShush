@@ -1,4 +1,4 @@
-module github.com/fuglaro/filet-cloud
+module github.com/fuglaro/webshush
 
 go 1.22
 
