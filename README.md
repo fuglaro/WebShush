@@ -1,5 +1,5 @@
 # TODO
-* Check browser credential storage works right across different hosts - understand navigator.credentials - maybe store hostkey in this?
+* Login screengrab.
 * Copy and Paste:
   * Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
   * Copy and paste buffer length issues? Tmux.
@@ -8,7 +8,6 @@
   * Support Shift+Drag for terminal text selection (overriding passing mouse events) consistenly across client OSs, similar to Alacritty, with a new xtermjs option.
   * Force selection in the terminal on macOS (https://github.com/xtermjs/xterm.js/issues/4329).
 * Replace over the old WebShuSH
-* Login screengrab.
 
 # 🖥 WebShuSH
 
@@ -21,12 +20,13 @@ A simple and powerful SSH portal for access to your hosts via the web.
 * 🖥 Launch shell customization.
 * 🔗Supports session reconnection (set shell to `tmux attach || tmux`).
 * 📌 Automatic connection parameter saving (into URL for bookmarking).
+* 💻 Host and port specifiers (defaulting to localhost and port 22).
 * 🤓 Nerd Font icons (Noto Mono Nerd Font).
 * 🎨 Beautiful Alacritty color theme.
 * 💪 Hardened security.
 * 🔑 Supports Strict Host Key Checking.
 * 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
-* 🔏 Compatible with browser credentials managgement.
+* 🔏 Compatible with browser credentials management.
 * 🎁 Self contained single-file executable.
 * 🌏 Access from Firefox, Safari, Chrome, and other Chromium based browsers.
 * 🐎 Lightweight and fast.
