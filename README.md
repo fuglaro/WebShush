@@ -15,6 +15,8 @@
 
 A simple and powerful SSH portal for access to your hosts via the web.
 
+![](demo-login.jpg) ![](demo-term.jpg)
+
 ## Features
 * 👤 Simple login screen.
 * 🖥 Launch shell customization.
