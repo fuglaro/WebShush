@@ -1,14 +1,32 @@
 #!/bin/bash
-VER=v$(date '+%y.%m').$(git rev-parse --short HEAD~5 | xxd -r -p | base64)
-mkdir -p builds
-GOARCH=arm GOARM=5 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-raspberry-pi
-GOARCH=arm64 GOOS=android go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-android
-GOARCH=arm64 GOOS=darwin go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-macos-apple
-GOARCH=amd64 GOOS=darwin go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-macos-intel
-GOARCH=amd64 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-linux-x64
-GOARCH=386 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-linux-x86
-GOARCH=arm64 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-linux-arm
-GOARCH=riscv64 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/filet-cloud-linux-riscv
-echo
-echo "RELEASE: $VER"
-echo
+
+# Ensure dependencies are downloaded.
+[ ! -f "resources/deps/xterm.js" ] && \
+  wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js -O resources/deps/xterm.js
+[ ! -f "resources/deps/xterm.css" ] && \
+  wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css -O resources/deps/xterm.css
+[ ! -f "resources/deps/xterm-addon-fit.js" ] && \
+  wget https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js -O resources/deps/xterm-addon-fit.js
+
+# Release build
+if [[ "$1" == "release" ]]; then
+  VER=v$(date '+%y.%m').$(git rev-parse --short HEAD~5 | xxd -r -p | base64)
+  set -x
+  mkdir -p builds
+  GOARCH=arm GOARM=5 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/webshush-raspberry-pi
+  GOARCH=arm64 GOOS=android go build -ldflags "-X main.version=$VER" -o builds/webshush-android
+  GOARCH=arm64 GOOS=darwin go build -ldflags "-X main.version=$VER" -o builds/webshush-macos-apple
+  GOARCH=amd64 GOOS=darwin go build -ldflags "-X main.version=$VER" -o builds/webshush-macos-intel
+  GOARCH=amd64 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/webshush-linux-x64
+  GOARCH=386 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/webshush-linux-x86
+  GOARCH=arm64 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/webshush-linux-arm
+  GOARCH=riscv64 GOOS=linux go build -ldflags "-X main.version=$VER" -o builds/webshush-linux-riscv
+  set +x
+  echo
+  echo "RELEASE: $VER"
+  echo "===================="
+  ls -1 builds/webshush-*
+fi
+
+# Standard build
+go build
