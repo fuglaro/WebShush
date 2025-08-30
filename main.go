@@ -151,6 +151,16 @@ func connect(w http.ResponseWriter, r *http.Request) {
 	if checkInWS(c, &mutex, -99, err) {
 		return
 	}
+	// Parse the user into username, host, and port, with defaults.
+	userhost := strings.SplitN(string(user), "@", 2)
+	username := userhost[0]
+	var hostname = "localhost"
+	if len(userhost) > 1 {
+		hostname = userhost[1]
+	}
+	if !strings.Contains(hostname, ":") {
+		hostname += ":22"
+	}
 	_, pass, err := c.ReadMessage()
 	if checkInWS(c, &mutex, -99, err) {
 		return
@@ -158,14 +168,6 @@ func connect(w http.ResponseWriter, r *http.Request) {
 	_, code, err := c.ReadMessage()
 	if checkInWS(c, &mutex, -99, err) {
 		return
-	}
-	_, host, err := c.ReadMessage()
-	if checkInWS(c, &mutex, -99, err) {
-		return
-	}
-	var hostname = string(host)
-	if !strings.Contains(hostname, ":") {
-		hostname += ":22"
 	}
 	_, hostkey, err := c.ReadMessage()
 	if checkInWS(c, &mutex, -99, err) {
@@ -191,7 +193,7 @@ func connect(w http.ResponseWriter, r *http.Request) {
 		return nil
 	}
 	sshConn, err := ssh.Dial("tcp", hostname, &ssh.ClientConfig{
-		User: string(user),
+		User: username,
 		Auth: []ssh.AuthMethod{
 			ssh.KeyboardInteractive(
 				func(name, instruction string, questions []string, echos []bool) (answers []string, err error) {

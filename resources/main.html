@@ -123,7 +123,7 @@
 			<ul>
 				<li>
 					<label for=username>username</label>
-					<input type=text id=username name=username required />
+					<input type=text id=username name=username placeholder=user[@host[:port]] required />
 				</li>
 				<li>
 					<label for=password>password</label>
@@ -133,10 +133,6 @@
 					<label for=code></label>
 					<input type=text id=code name=code title="2FA access code (optional on some servers)" size=6
 						autocomplete="off" placeholder="### ###" />
-				</li>
-				<li>
-					<label for=host>host</label>
-					<input type=text id=host name=host value=localhost required />
 				</li>
 				<li>
 					<label for=hostkey>hostkey</label>
@@ -194,7 +190,6 @@
 						url.searchParams.set(i.name, i.value)
 					})
 					if (window.location != url.href) {
-						console.log("PUSHING")
 						window.history.pushState(url.href, "", url.href)
 					}
 				}
@@ -235,17 +230,18 @@
 					// Process login flow and handshake.
 					ws.onopen = async () => {
 						// Authenticate WebSocket connection.
+
 						ws.send(this.shadowRoot.querySelector("#CSRFToken").value)
 						ws.send(this.shadowRoot.querySelector("#username").value)
 						ws.send(this.shadowRoot.querySelector("#password").value)
 						ws.send(this.shadowRoot.querySelector("#code").value)
-						ws.send(this.shadowRoot.querySelector("#host").value)
 						ws.send(this.shadowRoot.querySelector("#hostkey").value)
 						ws.send(this.shadowRoot.querySelector("#shell").value)
 						await handshake
 						saveURL()
-						// Give connection to the server API.
-						if (!hostkeyfail) server.connect(ws)
+						// Validate then send connection to the server API.
+						if (hostkeyfail) return
+						server.connect(ws)
 					}
 					document.body.removeChild(document.querySelector("login-form"))
 				}).catch(() => location.reload())
