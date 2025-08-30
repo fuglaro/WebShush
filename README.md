@@ -22,9 +22,9 @@ Enjoy seamless terminal access from your browser!
 
 ## Features
 * 👤 Simple login screen.
-* 🖥 Launch shell customization.
-* 🔗Supports session reconnection (set shell to `tmux attach || tmux`).
-* 📌 Automatic connection parameter saving (into URL for bookmarking).
+* 🖥 Launch shell customizations.
+* 🔗Support for session reconnection (set shell to `tmux attach || tmux`).
+* 📌 Automatic connection parameter saving (into the URL for bookmarking).
 * 💻 Host and port specifiers (defaulting to localhost and port 22).
 * 🤓 Nerd Font icons (Noto Mono Nerd Font).
 * 🎨 Beautiful Alacritty color theme.
