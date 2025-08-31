@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Ensure dependencies are downloaded.
+mkdir -p resources/deps
 [ ! -f "resources/deps/xterm.js" ] && \
   wget https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js -O resources/deps/xterm.js
 [ ! -f "resources/deps/xterm.css" ] && \
