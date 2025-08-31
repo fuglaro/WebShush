@@ -320,22 +320,7 @@
 								term.clearSelection()
 							else return false
 						}
-
-
-
-
-						const mods = ((e.shiftKey ? 1 : 0) | (e.altKey ? 2 : 0) |
-							(e.ctrlKey ? 4 : 0) | (e.metaKey ? 8 : 0))
-
-						// XXX TODO clear this out custom handler if not used in this 2025 dev cycle.
-						console.log(e)
-
-
-						//return false
 					})
-
-
-
 					// Set up terminal messaging.
 					stThis.#onTermMsg = m => {
 						if (m === null) {
