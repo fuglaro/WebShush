@@ -6,8 +6,6 @@ The fast and powerful SSH portal for terminal access in your browser!
 |----|----|
 | ![](demo-login.jpg) | ![](demo-term.jpg) |
 
-![](favicon.ico)
-
 ## Features
 * 👤 Simple login screen.
 * 🖥 Launch shell customizations.
