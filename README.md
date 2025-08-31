@@ -1,6 +1,6 @@
-# ![](favicon.ico) WebShuSH
+# ![](favicon.ico) WebShush
 
-The fast and powerful SSH portal for terminal access in your browser!
+The whisper thin SSH portal for terminal access in your browser!
 
 | <!-- --> | <!-- --> |
 |----|----|
