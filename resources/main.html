@@ -22,7 +22,7 @@
 	}
 
 	:root {
-		color-scheme: light dark;
+		color-scheme: dark;
 		--term-font: NotoMonoNerd;
 	}
 
@@ -231,7 +231,6 @@
 					// Process login flow and handshake.
 					ws.onopen = async () => {
 						// Authenticate WebSocket connection.
-
 						ws.send(this.shadowRoot.querySelector("#CSRFToken").value)
 						ws.send(this.shadowRoot.querySelector("#username").value)
 						ws.send(this.shadowRoot.querySelector("#password").value)
@@ -282,11 +281,15 @@
 				}
 				connectedCallback() {
 					const terminal = this.shadowRoot.getElementById("render")
+					// Disable the browser context menu.
+					terminal.oncontextmenu = () => false
+					// Set the terminal theme.
 					const term = new Terminal({
 						fontFamily: terminal.style.fontFamily,
 						fontSize: 12,
 						theme: theme
 					})
+					// Activate full screen.
 					const fitTerm = new window.FitAddon.FitAddon()
 					term.loadAddon(fitTerm)
 					term.open(terminal)
@@ -295,6 +298,45 @@
 						// Resize the terminal pty session to the new rows and columns size.
 						stThis.#ws.send(JSON.stringify({cols: term.cols, rows: term.rows}))
 					}
+					// Fix Copy / Paste behaviour.
+					terminal.addEventListener("mousedown", e => {
+						// Ensure Shift+Drag always starts selection at mouse down location.
+						if (e.shiftKey) {
+							// Match Shift+Drag behaviour as when shell command has captured mouse.
+							const sel = term._core._selectionService
+							sel.disable()
+							sel.handleMouseDown(e)
+							sel.enable()
+						}
+					})
+					term.attachCustomKeyEventHandler(e => {
+						// Allow Ctrl+c to trigger copy when there is a selection
+						// by bypassing sending keys to the terminal until a normal
+						// key-up even occurs, clearing the selection after any
+						// potential copy event.
+						if (term.hasSelection()) {
+							if (e.type == "keyup"
+								&& e.key != "Shift" && e.key != "Alt" && e.key != "Control")
+								term.clearSelection()
+							else return false
+						}
+
+
+
+
+						const mods = ((e.shiftKey ? 1 : 0) | (e.altKey ? 2 : 0) |
+							(e.ctrlKey ? 4 : 0) | (e.metaKey ? 8 : 0))
+
+						// XXX TODO clear this out custom handler if not used in this 2025 dev cycle.
+						console.log(e)
+
+
+						//return false
+					})
+
+
+
+					// Set up terminal messaging.
 					stThis.#onTermMsg = m => {
 						if (m === null) {
 							// Close terminal.
@@ -306,16 +348,6 @@
 						}
 						else term.write(m)
 					}
-					term.attachCustomKeyEventHandler(e => {
-						const mods = ((e.shiftKey ? 1 : 0) | (e.altKey ? 2 : 0) |
-							(e.ctrlKey ? 4 : 0) | (e.metaKey ? 8 : 0))
-
-						// XXX TODO clear this out custom handler if not used in this 2025 dev cycle.
-						console.log(e)
-
-
-						//return false
-					})
 					// Start streaming terminal input etc.
 					term.onData(d => {stThis.#ws.send(new Blob([d]))})
 					// Send start-session message.

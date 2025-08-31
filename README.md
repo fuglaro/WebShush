@@ -1,24 +1,12 @@
-# TODO
-* Copy and Paste:
-  * Implement Copy (and paste) with copy being capture when something is selected - and respecting browser shortcuts.
-  * Copy and paste buffer length issues? Tmux.
-  * Copy and past buffer auto strip space at end of lines.
-  * Support requests the clipboard from the client using the xterm(1) escape sequence (see tmux).
-  * Support Shift+Drag for terminal text selection (overriding passing mouse events) consistenly across client OSs, similar to Alacritty, with a new xtermjs option.
-  * Force selection in the terminal on macOS (https://github.com/xtermjs/xterm.js/issues/4329).
-* Replace over the old WebShuSH
+# ![](favicon.ico) WebShuSH
+
+The fast and powerful SSH portal for terminal access in your browser!
+
+| <!-- --> | <!-- --> |
+|----|----|
+| ![](demo-login.jpg) | ![](demo-term.jpg) |
 
 ![](favicon.ico)
-
-#  WebShuSH
-
-The simple and powerful SSH portal to access your hosts through the web.
-
-![](demo-login.jpg)
-
-Enjoy seamless terminal access from your browser!
-
-![](demo-term.jpg)
 
 ## Features
 * 👤 Simple login screen.
@@ -28,6 +16,8 @@ Enjoy seamless terminal access from your browser!
 * 💻 Host and port specifiers (defaulting to localhost and port 22).
 * 🤓 Nerd Font icons (Noto Mono Nerd Font).
 * 🎨 Beautiful Alacritty color theme.
+* 🖍️ Double Click, Triple Click, Shift+Drag and Shift+Alt+Drag selection controls.
+* 📋 Intuitive copy and paste controls, in harmony with sending interrupts.
 * 💪 Hardened security.
 * 🔑 Supports Strict Host Key Checking.
 * 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
@@ -107,7 +97,8 @@ so the aim is that a security audit, for whosoever wishes to do it, should be as
 Nothing is secure until it is audited and reviewed by peers.
 
 # Wish List for Future Work
-* Kitty Control Sequence Protocol addon (https://sw.kovidgoyal.net/kitty/keyboard-protocol).
+* Support remote terminal commands sending clipboard events (ANSI OSC 52 support) - due in xtermjs 6.0.0 milestone (https://github.com/xtermjs/xterm.js/issues/3260).
+* Kitty Control Sequence Protocol xtermjs addon (https://sw.kovidgoyal.net/kitty/keyboard-protocol).
 
 # Thanks to
 We stand on the shoulders of giants. They own this, far more than I do.
