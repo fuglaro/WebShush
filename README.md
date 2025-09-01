@@ -97,6 +97,7 @@ Nothing is secure until it is audited and reviewed by peers.
 # Wish List for Future Work
 * Support remote terminal commands sending clipboard events (ANSI OSC 52 support) - due in xtermjs 6.0.0 milestone (https://github.com/xtermjs/xterm.js/issues/3260).
 * Kitty Control Sequence Protocol xtermjs addon (https://sw.kovidgoyal.net/kitty/keyboard-protocol).
+* Electron app builds.
 
 # Thanks to
 We stand on the shoulders of giants. They own this, far more than I do.
