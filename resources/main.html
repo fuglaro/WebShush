@@ -251,15 +251,15 @@
 	*/
 	class XTerm {
 		#term = null
-		#fitTerm = null
 		#resize = () => { }
+		#send = k => { }
 		constructor() {
 			// Set up the terminal.
 			const terminal = document.querySelector("#render")
 			// Disable the browser context menu.
 			terminal.oncontextmenu = () => false
 			// Set the terminal theme.
-			const term = new Terminal({
+			const term = this.#term = new Terminal({
 				fontFamily: "NotoMonoNerd",
 				fontSize: 13,
 				theme: {
@@ -276,8 +276,6 @@
 			const fitTerm = new window.FitAddon.FitAddon()
 			term.loadAddon(fitTerm)
 			fitTerm.fit()
-			this.#term = term
-			this.#fitTerm = fitTerm
 			// Fix Copy / Paste behaviour.
 			terminal.addEventListener("mousedown", e => {
 				// Ensure Shift+Drag always starts selection at mouse down location.
@@ -289,6 +287,12 @@
 					sel.enable()
 				}
 			})
+			// Connect up resizing events.
+			this.#resize = window.onresize = () => {
+				fitTerm.fit()
+				// Resize the terminal pty session to the new rows and columns size.
+				this.#send(JSON.stringify({cols: term.cols, rows: term.rows}))
+			}
 			// Fix Copy / Paste behaviour and Zoom.
 			term.attachCustomKeyEventHandler(e => {
 				// Handle font size controls.
@@ -313,12 +317,21 @@
 						term.clearSelection()
 					else return false
 				}
+				// Key sequence pass throughs
+				const comboKeys = {"1000Tab": "\x1b\t"}
+				if (e.type == "keydown") {
+					const combo = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey, e.code].join('')
+					const comboKey = comboKeys[combo]
+					if (comboKey) {
+						this.#send(new Blob([comboKey]))
+						return false
+					}
+				}
 			})
 		}
 
 		async connect(ws) {
 			const term = this.#term
-			const fitTerm = this.#fitTerm
 			var onTermMsg = m => { }
 			ws.onclose = () => {
 				// close terminal if open.
@@ -344,18 +357,15 @@
 			let msgQueue = Promise.resolve()
 			ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m)
 			)
-			// Connect up resizing events.
-			this.#resize = window.onresize = () => {
-				fitTerm.fit()
-				// Resize the terminal pty session to the new rows and columns size.
-				ws.send(JSON.stringify({cols: term.cols, rows: term.rows}))
-			}
+			// Set up the direct send route for key combo control sequence pass through.
+			this.#send = k => ws.send(k)
 			// Set up terminal messaging.
 			onTermMsg = m => {
 				if (m === null) {
 					// Close terminal.
 					term.dispose()
 					onTermMsg = m => { }
+					this.#send = k => { }
 					window.onresize = null
 					location.reload(true)
 				}
