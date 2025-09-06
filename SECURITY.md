@@ -21,9 +21,9 @@ Since this service proxies SSH credentials, and streams personal data, hardened 
   * The login credentials are passed directly to the WebSocket connection.
   * The backend passes the credentials directly into establishing an SSH connection.
   * The SSH connection is attached to the WebSocket connection to handle future communication.
-  * The credentials are not stored in any persistent way.
+  * The credentials are not stored in any persistenxterm
   * Failure to establish an authenticated SSH connection will close the WebSocket connection, triggering a new login sequence.
-  * After sending the credentials to the WebSocket connection, the login form will pass the potentially authenticated WebSocket connection to be stored inside an instance of the Server class in a private variable, so as to restrict direct access from JavaScript except via its API.
+  * After sending the credentials to the WebSocket connection, the login form will pass the potentially authenticated WebSocket connection directly to the XTerm class's connect method.
 * The user may choose to store the credentials in the browser's password management system, if supported and enabled in the browser. For additial security, 2FA is recommended.
 * Logout occurs when either the browser or the backend closes the WebSocket connection, such as:
   * Automatically when closing or refreshing the browser tab.
