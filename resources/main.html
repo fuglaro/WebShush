@@ -235,7 +235,9 @@
 					document.body.removeChild(document.querySelector("login-form"))
 				}).catch(() => location.reload())
 			})
-			this.shadowRoot.querySelector("#username").focus()
+			if (!this.shadowRoot.querySelector("#username").value)
+				this.shadowRoot.querySelector("#username").focus()
+			else this.shadowRoot.querySelector("#password").focus()
 		}
 	})
 	window.onload = async () => {
