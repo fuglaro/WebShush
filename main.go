@@ -363,6 +363,7 @@ func connect(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Handle options.
 	if h := os.Getenv("WEBSHUSH_DEFAULT_HOST"); h != "" {
+		fmt.Fprintf(os.Stderr, "WEBSHUSH_DEFAULT_HOST=%v\n", h)
 		hostname = h
 	}
 	addr := os.Getenv("WEBSHUSH_LISTEN")
