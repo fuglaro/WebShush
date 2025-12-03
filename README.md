@@ -55,7 +55,7 @@ Supported environment variables:
 * `WEBSHUSH_CERT_FILE` & `WEBSHUSH_KEY_FILE`: The credentials to use for TLS connections.
 * `WEBSHUSH_DOMAIN`: The domain to use with the included Let's Encrypt integration. Use of this implies acceptance of the LetsEncrypt Terms of Service.
 * `WEBSHUSH_LISTEN`: The address to listen on. Defaults to ':443'.
-* `WEBSHUSH_SSH_PORT`: The port to use to connect locally.
+* `WEBSHUSH_DEFAULT_HOST`: The default host (and optionally port) to ssh to, otherwise it defaults to localhost.
 
 ## Design
 This design for this solution favors simplicity and minimalism, both inside and out,

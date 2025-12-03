@@ -32,7 +32,7 @@ var res embed.FS
 
 var version string
 
-var sshport = "22"
+var hostname = "localhost"
 var upgrader = websocket.Upgrader{}
 var privateKey = make([]byte, 512/8)
 var connectionID atomic.Uint64 // sequential ID generator making keys for connections.
@@ -154,7 +154,6 @@ func connect(w http.ResponseWriter, r *http.Request) {
 	// Parse the user into username, host, and port, with defaults.
 	userhost := strings.SplitN(string(user), "@", 2)
 	username := userhost[0]
-	var hostname = "localhost"
 	if len(userhost) > 1 {
 		hostname = userhost[1]
 	}
@@ -363,8 +362,8 @@ func connect(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Handle options.
-	if p := os.Getenv("WEBSHUSH_SSH_PORT"); p != "" {
-		sshport = p
+	if h := os.Getenv("WEBSHUSH_DEFAULT_HOST"); h != "" {
+		hostname = h
 	}
 	addr := os.Getenv("WEBSHUSH_LISTEN")
 	if addr == "" {
