@@ -196,7 +196,8 @@
 						const onmessage = async m => {
 							const keyfield = this.shadowRoot.querySelector("#hostkey")
 							const realkey = JSON.parse(m.data)
-							if (realkey == "") {
+							if (realkey["err"]) console.log(realkey["err"])
+							else if (realkey == "") {
 								hostkeyfail = true
 								ws.close()
 							} else if (keyfield.value == "") keyfield.value = realkey
