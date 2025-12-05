@@ -203,13 +203,19 @@
 						let msgQueue = Promise.resolve()
 						const handshake = new Promise(ok => {
 							const onmessage = async m => {
-								const keyfield = this.shadowRoot.querySelector("#hostkey")
 								const realkey = JSON.parse(m.data)
 								if (realkey["err"]) console.log(realkey["err"])
 								else if (realkey == "") {
 									hostkeyfail = true
 									ws.close()
-								} else if (keyfield.value == "") keyfield.value = realkey
+								} else {
+									const keyfield = this.shadowRoot.querySelector("#hostkey")
+									if (keyfield.value == "") keyfield.value = realkey["hostkey"]
+									const userfield = this.shadowRoot.querySelector("#username")
+									if (!userfield.value.includes("@")) {
+										userfield.value += "@" + realkey["hostname"].replace(/:22$/, '')
+									}
+								}
 								ok()
 							}
 							ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m))

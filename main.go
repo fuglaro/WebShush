@@ -185,7 +185,8 @@ func connect(w http.ResponseWriter, r *http.Request) {
 			}
 			return fmt.Errorf("Bad Host Key")
 		}
-		if c.WriteJSON(realkey) != nil {
+		// Send the realkey to the client for reference.
+		if c.WriteJSON(map[string]interface{}{"hostname": hostname, "hostkey": realkey}) != nil {
 			return fmt.Errorf("Host Key Send Failure")
 		}
 
