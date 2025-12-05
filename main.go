@@ -477,7 +477,8 @@ VERSION: ` + version + "\n")
 		}
 		nonce := base64.URLEncoding.EncodeToString(nonceb)
 		w.Header().Set("Content-Security-Policy", "sandbox allow-downloads allow-forms "+
-			"allow-same-origin allow-scripts; default-src 'none'; frame-ancestors 'none'; "+
+			"allow-same-origin allow-scripts allow-modals; "+
+			"default-src 'none'; frame-ancestors 'none'; "+
 			"form-action 'none'; img-src 'self'; media-src 'self'; font-src 'self'; "+
 			"connect-src 'self'; style-src-elem 'self' 'unsafe-inline'; "+
 			"style-src-attr 'unsafe-inline'; style-src 'self'; "+

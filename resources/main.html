@@ -142,6 +142,16 @@
 	"use strict"
 
 	/**
+	 * Ensure the user is warned when leaving an active session.
+	 */
+	var active = false
+	window.addEventListener("beforeunload", e => {
+		if (!active) return
+		e.preventDefault()
+		return e.returnValue = "Session in progress."
+	})
+
+	/**
 	* Login form management.
 	* Run in a shadow root for extra security.
 	*/
@@ -298,6 +308,7 @@
 			}
 			// Fix Copy / Paste behaviour and Zoom.
 			term.attachCustomKeyEventHandler(e => {
+				active = true
 				// Handle font size controls.
 				if (e.code == 'Minus' && (e.ctrlKey || e.metaKey) && e.type == 'keydown') {
 					term.options.fontSize--
@@ -337,13 +348,17 @@
 			const term = this.#term
 			var onTermMsg = m => { }
 			ws.onclose = () => {
+				active = false
 				// close terminal if open.
 				onTermMsg(null)
 				onTermMsg = m => { }
 				// Trigger a re-login prompt.
 				location.reload(true)
 			}
-			window.onbeforeunload = () => ws.close() // Force logout ASAP
+			window.addEventListener("beforeunload", e => {
+				if (active) return
+				ws.close() // Force logout
+			})
 			ws.onerror = () => ws.close()
 			// Setup normal message response handling.
 			const onmessage = async m => {
@@ -365,6 +380,7 @@
 			// Set up terminal messaging.
 			onTermMsg = m => {
 				if (m === null) {
+					active = false
 					// Close terminal.
 					term.dispose()
 					onTermMsg = m => { }
