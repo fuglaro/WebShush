@@ -1,457 +1,463 @@
-<!doctype html>
-<meta charset=utf-8>
-<meta name="viewport" content="initial-scale=1, user-scalable=0, interactive-widget=resizes-content" />
-<title>WebShuSH</title>
-<link rel=stylesheet href="/resources/deps/xterm.css"
-	integrity="sha384-LJcOxlx9IMbNXDqJ2axpfEQKkAYbFjJfhXexLfiRJhjDU81mzgkiQq8rkV0j6dVh" />
-<script nonce="{{.Nonce}}">
-	// Temporarily hide Macs from xtermjs loading to avoid it forcing Mac-style controls.
-	// See: https://github.com/xtermjs/xterm.js/issues/4329
-	_plt = navigator.platform
-	navigator.__defineGetter__('platform', () => _plt.indexOf('Mac') == 0 ? 'nixLinux' : _plt)
-</script>
-<script src="/resources/deps/xterm.js"
-	integrity="sha384-/nfmYPUzWMS6v2atn8hbljz7NE0EI1iGx34lJaNzyVjWGDzMv+ciUZUeJpKA3Glc"></script>
-<script nonce="{{.Nonce}}">navigator.__defineGetter__('platform', () => _plt)</script>
-<script src="/resources/deps/xterm-addon-fit.js"
-	integrity="sha384-AQLWHRKAgdTxkolJcLOELg4E9rE89CPE2xMy3tIRFn08NcGKPTsELdvKomqji+DL"></script>
+<!DOCTYPE html>
+<html>
 
-<!--
+<head>
+	<meta charset=utf-8>
+	<meta name="viewport" content="initial-scale=1, user-scalable=0, interactive-widget=resizes-content">
+	<title>WebShuSH</title>
+	<link rel=stylesheet href="/resources/deps/xterm.css"
+		integrity="sha384-LJcOxlx9IMbNXDqJ2axpfEQKkAYbFjJfhXexLfiRJhjDU81mzgkiQq8rkV0j6dVh">
+	<script nonce="{{.Nonce}}">
+		// Temporarily hide Macs from xtermjs loading to avoid it forcing Mac-style controls.
+		// See: https://github.com/xtermjs/xterm.js/issues/4329
+		_plt = navigator.platform
+		navigator.__defineGetter__('platform', () => _plt.indexOf('Mac') == 0 ? 'nixLinux' : _plt)
+	</script>
+	<script src="/resources/deps/xterm.js"
+		integrity="sha384-/nfmYPUzWMS6v2atn8hbljz7NE0EI1iGx34lJaNzyVjWGDzMv+ciUZUeJpKA3Glc"></script>
+	<script nonce="{{.Nonce}}">navigator.__defineGetter__('platform', () => _plt)</script>
+	<script src="/resources/deps/xterm-addon-fit.js"
+		integrity="sha384-AQLWHRKAgdTxkolJcLOELg4E9rE89CPE2xMy3tIRFn08NcGKPTsELdvKomqji+DL"></script>
+
+	<!--
 	-- Main page.
 	-->
-<style nonce="{{.Nonce}}">
-	:root {
-		color-scheme: dark;
-	}
-
-	@font-face {
-		font-family: NotoMonoNerd;
-		src: url("/resources/NotoMonoNerdFontMono-Regular.ttf");
-	}
-
-	body {
-		margin: 0px;
-		font-family: NotoMonoNerd;
-		overflow: hidden;
-	}
-
-	#render {
-		position: fixed;
-		width: 100vw;
-		height: 100vh;
-
-		/* Cleqr some nice padding for easy text selection. */
-		div.xterm-viewport {
-			scrollbar-width: none;
+	<style nonce="{{.Nonce}}">
+		:root {
+			color-scheme: dark;
 		}
 
-		div.terminal {
-			padding-left: 10px;
+		@font-face {
+			font-family: NotoMonoNerd;
+			src: url("/resources/NotoMonoNerdFontMono-Regular.ttf");
 		}
-	}
-</style>
+
+		body {
+			margin: 0px;
+			font-family: NotoMonoNerd;
+			overflow: hidden;
+		}
+
+		#render {
+			position: fixed;
+			width: 100vw;
+			height: 100vh;
+
+			/* Cleqr some nice padding for easy text selection. */
+			div.xterm-viewport {
+				scrollbar-width: none;
+			}
+
+			div.terminal {
+				padding-left: 10px;
+			}
+		}
+	</style>
+
+	<!--
+	-- Login form
+	-->
+	<template id=-login-form>
+		<style nonce="{{.Nonce}}">
+			:host {
+				position: fixed;
+				z-index: 999999;
+			}
+
+			div {
+				display: flex;
+				width: 100vw;
+				height: 100vh;
+				align-items: center;
+				justify-content: center;
+				font-family: system-ui;
+			}
+
+			ul {
+				list-style: none;
+			}
+
+			h1,
+			li {
+				margin: 3px;
+			}
+
+			label {
+				display: inline-block;
+				width: 80px;
+				text-align: right;
+			}
+
+			input {
+				padding: 5px;
+			}
+
+			button {
+				float: right;
+				font-size: 2em;
+				border-style: solid;
+				border-color: currentColor;
+				background-color: background;
+			}
+
+			button.loading {
+				filter: blur(3px);
+			}
+		</style>
+		<div tabindex="-1">
+			<form>
+				<h1>🖥 SSH</h1>
+				<ul>
+					<li>
+						<label for=username>username</label>
+						<input type=text id=username name=username placeholder=user[@host[:port]] required>
+					</li>
+					<li>
+						<label for=password>password</label>
+						<input type=password id=password name=password required>
+					</li>
+					<li>
+						<label for=code></label>
+						<input type=text id=code name=code title="2FA access code (optional on some servers)" size=6
+							autocomplete="off" placeholder="### ###">
+					</li>
+					<li>
+						<label for=hostkey>hostkey</label>
+						<input type=text id=hostkey name=hostkey>
+					</li>
+					<li>
+						<label for=shell>shell</label>
+						<input type=text id=shell name=shell placeholder=default>
+					</li>
+				</ul>
+				<button>Connect</button>
+				<input type=hidden id=CSRFToken value="{{.CSRF}}">
+			</form>
+		</div>
+	</template>
+
+
+	<script nonce="{{.Nonce}}">
+		"use strict"
+
+		/**
+		 * Ensure the user is warned when leaving an active session.
+		 */
+		var active = false
+		window.addEventListener("beforeunload", e => {
+			if (!active) return
+			e.preventDefault()
+			return e.returnValue = "Session in progress."
+		})
+
+		/**
+		* Login form management.
+		* Run in a shadow root for extra security.
+		*/
+		const login = () => {
+			if (!document.querySelector("login-form") && crossOriginIsolated)
+				document.body.appendChild(document.createElement("login-form"))
+		}
+		customElements.define("login-form", class extends HTMLElement {
+			constructor() {
+				super()
+				if (location.protocol != 'https:') return // Ensure secure transport.
+				this.attachShadow({mode: "open"}).appendChild(
+					document.getElementById("-login-form").content.cloneNode(true))
+			}
+			connectedCallback() {
+				if (!this.shadowRoot) return
+				const xterm = new XTerm
+				const loadURL = url => {
+					// Update the form with URL parameter info on load.
+					for (const [key, value] of new URL(url).searchParams.entries()) {
+						const el = this.shadowRoot.querySelector("#" + key)
+						if (el && el.nodeName == "INPUT") el.value = value
+					}
+				}
+				window.onpopstate = (e) => loadURL(e.state)
+				loadURL(window.location)
+				// Hook up the login form submission process.
+				this.shadowRoot.querySelector("form").addEventListener("submit", e => {
+					// Saving updated form (safe) connection parameters to url.
+					const saveURL = () => {
+						var url = new URL(window.location)
+						this.shadowRoot.querySelectorAll("input").forEach(i => {
+							if (i.id == "CSRFToken") return
+							if (i.id == "password") return
+							if (i.id == "code") return
+							url.searchParams.set(i.name, i.value)
+						})
+						if (window.location != url.href) {
+							window.history.pushState(url.href, "", url.href)
+						}
+					}
+					saveURL()
+					this.shadowRoot.querySelector("button").classList.add("loading")
+					e.preventDefault()
+					// Establish WebSocket connection.
+					fetch("/preconnect").then(() => {
+						const ws = new WebSocket(`wss://${window.location.host}/connect`)
+						var hostkeyfail = null
+						// Process all websocket events in an ordered background queue.
+						let msgQueue = Promise.resolve()
+						const handshake = new Promise(ok => {
+							const onmessage = async m => {
+								const keyfield = this.shadowRoot.querySelector("#hostkey")
+								const realkey = JSON.parse(m.data)
+								if (realkey["err"]) console.log(realkey["err"])
+								else if (realkey == "") {
+									hostkeyfail = true
+									ws.close()
+								} else if (keyfield.value == "") keyfield.value = realkey
+								ok()
+							}
+							ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m))
+						})
+						const onclose = async () => {
+							if (hostkeyfail) await warn(
+								"⚠️ WARNING ⚠️\n" +
+								"REMOTE HOST IDENTIFICATION HAS CHANGED!\n\n" +
+								"IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
+								"Host key verification failed.\n" +
+								"Someone could be eavesdropping on you right now\n" +
+								"(with an adversary-in-the-middle attack)!\n" +
+								"It is also possible that a host key has just been changed.")
+							location.reload(true)
+						}
+						ws.onclose = () => msgQueue = msgQueue.then(() => onclose())
+						ws.onerror = () => msgQueue = msgQueue.then(() => onclose())
+						// Process login flow and handshake.
+						ws.onopen = async () => {
+							// Authenticate WebSocket connection.
+							ws.send(this.shadowRoot.querySelector("#CSRFToken").value)
+							ws.send(this.shadowRoot.querySelector("#username").value)
+							ws.send(this.shadowRoot.querySelector("#password").value)
+							ws.send(this.shadowRoot.querySelector("#code").value)
+							ws.send(this.shadowRoot.querySelector("#hostkey").value)
+							ws.send(this.shadowRoot.querySelector("#shell").value)
+							await handshake
+							saveURL()
+							// Validate then send connection to the XTerm.
+							if (hostkeyfail) return
+							xterm.connect(ws)
+						}
+						document.body.removeChild(document.querySelector("login-form"))
+					}).catch(() => location.reload())
+				})
+				if (!this.shadowRoot.querySelector("#username").value)
+					this.shadowRoot.querySelector("#username").focus()
+				else this.shadowRoot.querySelector("#password").focus()
+			}
+		})
+		window.onload = async () => {
+			await Promise.all(Array.from(document.fonts).map(ff => ff.load()))
+			login()
+		}
+
+		/**
+		* Finalise the setup of the websocket connection,
+		* and load the terminal on the page.
+		* Securely manages server connection, with login and session management,
+		* and only exposes the minimum interface.
+		*/
+		class XTerm {
+			#term = null
+			#resize = () => { }
+			#send = k => { }
+			constructor() {
+				// Set up the terminal.
+				const terminal = document.querySelector("#render")
+				// Disable the browser context menu.
+				terminal.oncontextmenu = () => false
+				// Set the terminal theme.
+				const term = this.#term = new Terminal({
+					fontFamily: "NotoMonoNerd",
+					fontSize: 13,
+					theme: {
+						"background": "#181818", "foreground": "#d8d8d8", "cursorAccent": "#181818",
+						"cursor": "#d8d8d8", "black": "#181818", "red": "#ac4242", "green": "#90a959",
+						"yellow": "#f4bf75", "blue": "#6a9fb5", "magenta": "#aa759f", "cyan": "#75b5aa",
+						"white": "#d8d8d8", "brightBlack": "#6b6b6b", "brightRed": "#c55555",
+						"brightGreen": "#aac474", "brightYellow": "#feca88", "brightBlue": "#82b8c8",
+						"brightMagenta": "#c28cb8", "brightCyan": "#93d3c3", "brightWhite": "#f8f8f8"
+					}
+				})
+				term.open(terminal)
+				// Activate full screen.
+				const fitTerm = new window.FitAddon.FitAddon()
+				term.loadAddon(fitTerm)
+				fitTerm.fit()
+				// Fix Copy / Paste behaviour.
+				terminal.addEventListener("mousedown", e => {
+					// Ensure Shift+Drag always starts selection at mouse down location.
+					if (e.shiftKey) {
+						// Match Shift+Drag behaviour as when shell command has captured mouse.
+						const sel = term._core._selectionService
+						sel.disable()
+						sel.handleMouseDown(e)
+						sel.enable()
+					}
+				})
+				// Connect up resizing events.
+				this.#resize = window.onresize = () => {
+					fitTerm.fit()
+					// Resize the terminal pty session to the new rows and columns size.
+					this.#send(JSON.stringify({cols: term.cols, rows: term.rows}))
+				}
+				// Fix Copy / Paste behaviour and Zoom.
+				term.attachCustomKeyEventHandler(e => {
+					active = true
+					// Handle font size controls.
+					if (e.code == 'Minus' && (e.ctrlKey || e.metaKey) && e.type == 'keydown') {
+						term.options.fontSize--
+						this.#resize()
+						e.preventDefault()
+						return false
+					} else if (e.code == 'Equal' && (e.ctrlKey || e.metaKey) && e.type == 'keydown') {
+						term.options.fontSize++
+						this.#resize()
+						e.preventDefault()
+						return false
+					}
+					// Allow Ctrl+c to trigger copy when there is a selection
+					// by bypassing sending keys to the terminal until a normal
+					// key-up even occurs, clearing the selection after any
+					// potential copy event.
+					if (term.hasSelection()) {
+						if (e.type == "keyup"
+							&& e.key != "Shift" && e.key != "Alt" && e.key != "Control")
+							term.clearSelection()
+						else return false
+					}
+					// Key sequence pass throughs
+					const comboKeys = {"1000Tab": "\x1b\t"}
+					if (e.type == "keydown") {
+						const combo = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey, e.code].join('')
+						const comboKey = comboKeys[combo]
+						if (comboKey) {
+							this.#send(new Blob([comboKey]))
+							return false
+						}
+					}
+				})
+			}
+
+			async connect(ws) {
+				const term = this.#term
+				var onTermMsg = m => { }
+				ws.onclose = () => {
+					active = false
+					// close terminal if open.
+					onTermMsg(null)
+					onTermMsg = m => { }
+					// Trigger a re-login prompt.
+					location.reload(true)
+				}
+				window.addEventListener("beforeunload", e => {
+					if (active) return
+					ws.close() // Force logout
+				})
+				ws.onerror = () => ws.close()
+				// Setup normal message response handling.
+				const onmessage = async m => {
+					let id = null, v = null
+					if (m.data instanceof Blob) {
+						id = Number(await m.data.slice(0, 1).text())
+						v = await m.data.slice(1)
+					}
+					// Send data to xtermjs or close.
+					if (id === 1) onTermMsg(new Uint8Array(await v.arrayBuffer()))
+					else onTermMsg(null) // Close terminal.
+				}
+				// Process all websocket messages in an ordered background queue.
+				let msgQueue = Promise.resolve()
+				ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m)
+				)
+				// Set up the direct send route for key combo control sequence pass through.
+				this.#send = k => ws.send(k)
+				// Set up terminal messaging.
+				onTermMsg = m => {
+					if (m === null) {
+						active = false
+						// Close terminal.
+						term.dispose()
+						onTermMsg = m => { }
+						this.#send = k => { }
+						window.onresize = null
+						location.reload(true)
+					}
+					else term.write(m)
+				}
+				// Start streaming terminal input etc.
+				term.onData(d => {ws.send(new Blob([d]))})
+				// Send start-session message.
+				ws.send(JSON.stringify({rows: -1}))
+				this.#resize()
+				document.querySelector("#render").style.visibility = "visible"
+				term.focus()
+			}
+		}
+	</script>
+
+	<!--
+	-- warn
+	--
+	-- Pop-up prompt for warnings.
+	-->
+	<style nonce="{{.Nonce}}">
+		#pop {
+			position: fixed;
+			z-index: 99;
+			backdrop-filter: blur(18px);
+			-webkit-backdrop-filter: blur(18px);
+			background-color: rgba(255, 255, 255, 0.2);
+			width: 100vw;
+			height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+			white-space: pre-line;
+
+			button {
+				font-size: 1.6em;
+				border-style: solid;
+				border-color: currentColor;
+				float: right;
+				margin: 5px;
+				background-color: background;
+			}
+
+			* {
+				font-family: system-ui, NotoMonoNerd;
+			}
+		}
+	</style>
+	<template id=-prompt>
+		<div id=pop>
+			<h1></h1>
+			<p></p>
+			<button id=ok>OK</button>
+		</div>
+	</template>
+	<script nonce="{{.Nonce}}">
+		"use strict"
+		async function warn(msg) {
+			const el = document.getElementById("-prompt").content.cloneNode(true).querySelector("#pop")
+			el.querySelector("h1").textContent = msg.substr(0, msg.indexOf("\n"))
+			el.querySelector("p").textContent = msg.substr(msg.indexOf("\n") + 1)
+			document.body.appendChild(el)
+			el.querySelector("#ok").focus()
+			await new Promise(ok => el.querySelector("#ok").onclick = () => ok())
+			document.body.removeChild(el)
+		}
+	</script>
+</head>
 
 <body>
 	<div id=render style="visibility: hidden"></div>
 </body>
 
-<!--
-	-- Login form
-	-->
-<template id=-login-form>
-	<style nonce="{{.Nonce}}">
-		:host {
-			position: fixed;
-			z-index: 999999;
-		}
-
-		div {
-			display: flex;
-			width: 100vw;
-			height: 100vh;
-			align-items: center;
-			justify-content: center;
-			font-family: system-ui;
-		}
-
-		ul {
-			list-style: none;
-		}
-
-		h1,
-		li {
-			margin: 3px;
-		}
-
-		label {
-			display: inline-block;
-			width: 80px;
-			text-align: right;
-		}
-
-		input {
-			padding: 5px;
-		}
-
-		button {
-			float: right;
-			font-size: 2em;
-			border-style: solid;
-			border-color: currentColor;
-			background-color: background;
-		}
-
-		button.loading {
-			filter: blur(3px);
-		}
-	</style>
-	<div tabindex="-1">
-		<form>
-			<h1>🖥 SSH</h1>
-			<ul>
-				<li>
-					<label for=username>username</label>
-					<input type=text id=username name=username placeholder=user[@host[:port]] required />
-				</li>
-				<li>
-					<label for=password>password</label>
-					<input type=password id=password name=password required />
-				</li>
-				<li>
-					<label for=code></label>
-					<input type=text id=code name=code title="2FA access code (optional on some servers)" size=6
-						autocomplete="off" placeholder="### ###" />
-				</li>
-				<li>
-					<label for=hostkey>hostkey</label>
-					<input type=text id=hostkey name=hostkey />
-				</li>
-				<li>
-					<label for=shell>shell</label>
-					<input type=text id=shell name=shell placeholder=default />
-				</li>
-			</ul>
-			<button>Connect</button>
-			<input type=hidden id=CSRFToken value="{{.CSRF}}" />
-		</form>
-	</div>
-</template>
-
-
-<script nonce="{{.Nonce}}">
-	"use strict"
-
-	/**
-	 * Ensure the user is warned when leaving an active session.
-	 */
-	var active = false
-	window.addEventListener("beforeunload", e => {
-		if (!active) return
-		e.preventDefault()
-		return e.returnValue = "Session in progress."
-	})
-
-	/**
-	* Login form management.
-	* Run in a shadow root for extra security.
-	*/
-	const login = () => {
-		if (!document.querySelector("login-form") && crossOriginIsolated)
-			document.body.appendChild(document.createElement("login-form"))
-	}
-	customElements.define("login-form", class extends HTMLElement {
-		constructor() {
-			super()
-			if (location.protocol != 'https:') return // Ensure secure transport.
-			this.attachShadow({mode: "open"}).appendChild(
-				document.getElementById("-login-form").content.cloneNode(true))
-		}
-		connectedCallback() {
-			if (!this.shadowRoot) return
-			const xterm = new XTerm
-			const loadURL = url => {
-				// Update the form with URL parameter info on load.
-				for (const [key, value] of new URL(url).searchParams.entries()) {
-					const el = this.shadowRoot.querySelector("#" + key)
-					if (el && el.nodeName == "INPUT") el.value = value
-				}
-			}
-			window.onpopstate = (e) => loadURL(e.state)
-			loadURL(window.location)
-			// Hook up the login form submission process.
-			this.shadowRoot.querySelector("form").addEventListener("submit", e => {
-				// Saving updated form (safe) connection parameters to url.
-				const saveURL = () => {
-					var url = new URL(window.location)
-					this.shadowRoot.querySelectorAll("input").forEach(i => {
-						if (i.id == "CSRFToken") return
-						if (i.id == "password") return
-						if (i.id == "code") return
-						url.searchParams.set(i.name, i.value)
-					})
-					if (window.location != url.href) {
-						window.history.pushState(url.href, "", url.href)
-					}
-				}
-				saveURL()
-				this.shadowRoot.querySelector("button").classList.add("loading")
-				e.preventDefault()
-				// Establish WebSocket connection.
-				fetch("/preconnect").then(() => {
-					const ws = new WebSocket(`wss://${window.location.host}/connect`)
-					var hostkeyfail = null
-					// Process all websocket events in an ordered background queue.
-					let msgQueue = Promise.resolve()
-					const handshake = new Promise(ok => {
-						const onmessage = async m => {
-							const keyfield = this.shadowRoot.querySelector("#hostkey")
-							const realkey = JSON.parse(m.data)
-							if (realkey["err"]) console.log(realkey["err"])
-							else if (realkey == "") {
-								hostkeyfail = true
-								ws.close()
-							} else if (keyfield.value == "") keyfield.value = realkey
-							ok()
-						}
-						ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m))
-					})
-					const onclose = async () => {
-						if (hostkeyfail) await warn(
-							"⚠️ WARNING ⚠️\n" +
-							"REMOTE HOST IDENTIFICATION HAS CHANGED!\n\n" +
-							"IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!\n" +
-							"Host key verification failed.\n" +
-							"Someone could be eavesdropping on you right now\n" +
-							"(with an adversary-in-the-middle attack)!\n" +
-							"It is also possible that a host key has just been changed.")
-						location.reload(true)
-					}
-					ws.onclose = () => msgQueue = msgQueue.then(() => onclose())
-					ws.onerror = () => msgQueue = msgQueue.then(() => onclose())
-					// Process login flow and handshake.
-					ws.onopen = async () => {
-						// Authenticate WebSocket connection.
-						ws.send(this.shadowRoot.querySelector("#CSRFToken").value)
-						ws.send(this.shadowRoot.querySelector("#username").value)
-						ws.send(this.shadowRoot.querySelector("#password").value)
-						ws.send(this.shadowRoot.querySelector("#code").value)
-						ws.send(this.shadowRoot.querySelector("#hostkey").value)
-						ws.send(this.shadowRoot.querySelector("#shell").value)
-						await handshake
-						saveURL()
-						// Validate then send connection to the XTerm.
-						if (hostkeyfail) return
-						xterm.connect(ws)
-					}
-					document.body.removeChild(document.querySelector("login-form"))
-				}).catch(() => location.reload())
-			})
-			if (!this.shadowRoot.querySelector("#username").value)
-				this.shadowRoot.querySelector("#username").focus()
-			else this.shadowRoot.querySelector("#password").focus()
-		}
-	})
-	window.onload = async () => {
-		await Promise.all(Array.from(document.fonts).map(ff => ff.load()))
-		login()
-	}
-
-	/**
-	* Finalise the setup of the websocket connection,
-	* and load the terminal on the page.
-	* Securely manages server connection, with login and session management,
-	* and only exposes the minimum interface.
-	*/
-	class XTerm {
-		#term = null
-		#resize = () => { }
-		#send = k => { }
-		constructor() {
-			// Set up the terminal.
-			const terminal = document.querySelector("#render")
-			// Disable the browser context menu.
-			terminal.oncontextmenu = () => false
-			// Set the terminal theme.
-			const term = this.#term = new Terminal({
-				fontFamily: "NotoMonoNerd",
-				fontSize: 13,
-				theme: {
-					"background": "#181818", "foreground": "#d8d8d8", "cursorAccent": "#181818",
-					"cursor": "#d8d8d8", "black": "#181818", "red": "#ac4242", "green": "#90a959",
-					"yellow": "#f4bf75", "blue": "#6a9fb5", "magenta": "#aa759f", "cyan": "#75b5aa",
-					"white": "#d8d8d8", "brightBlack": "#6b6b6b", "brightRed": "#c55555",
-					"brightGreen": "#aac474", "brightYellow": "#feca88", "brightBlue": "#82b8c8",
-					"brightMagenta": "#c28cb8", "brightCyan": "#93d3c3", "brightWhite": "#f8f8f8"
-				}
-			})
-			term.open(terminal)
-			// Activate full screen.
-			const fitTerm = new window.FitAddon.FitAddon()
-			term.loadAddon(fitTerm)
-			fitTerm.fit()
-			// Fix Copy / Paste behaviour.
-			terminal.addEventListener("mousedown", e => {
-				// Ensure Shift+Drag always starts selection at mouse down location.
-				if (e.shiftKey) {
-					// Match Shift+Drag behaviour as when shell command has captured mouse.
-					const sel = term._core._selectionService
-					sel.disable()
-					sel.handleMouseDown(e)
-					sel.enable()
-				}
-			})
-			// Connect up resizing events.
-			this.#resize = window.onresize = () => {
-				fitTerm.fit()
-				// Resize the terminal pty session to the new rows and columns size.
-				this.#send(JSON.stringify({cols: term.cols, rows: term.rows}))
-			}
-			// Fix Copy / Paste behaviour and Zoom.
-			term.attachCustomKeyEventHandler(e => {
-				active = true
-				// Handle font size controls.
-				if (e.code == 'Minus' && (e.ctrlKey || e.metaKey) && e.type == 'keydown') {
-					term.options.fontSize--
-					this.#resize()
-					e.preventDefault()
-					return false
-				} else if (e.code == 'Equal' && (e.ctrlKey || e.metaKey) && e.type == 'keydown') {
-					term.options.fontSize++
-					this.#resize()
-					e.preventDefault()
-					return false
-				}
-				// Allow Ctrl+c to trigger copy when there is a selection
-				// by bypassing sending keys to the terminal until a normal
-				// key-up even occurs, clearing the selection after any
-				// potential copy event.
-				if (term.hasSelection()) {
-					if (e.type == "keyup"
-						&& e.key != "Shift" && e.key != "Alt" && e.key != "Control")
-						term.clearSelection()
-					else return false
-				}
-				// Key sequence pass throughs
-				const comboKeys = {"1000Tab": "\x1b\t"}
-				if (e.type == "keydown") {
-					const combo = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey, e.code].join('')
-					const comboKey = comboKeys[combo]
-					if (comboKey) {
-						this.#send(new Blob([comboKey]))
-						return false
-					}
-				}
-			})
-		}
-
-		async connect(ws) {
-			const term = this.#term
-			var onTermMsg = m => { }
-			ws.onclose = () => {
-				active = false
-				// close terminal if open.
-				onTermMsg(null)
-				onTermMsg = m => { }
-				// Trigger a re-login prompt.
-				location.reload(true)
-			}
-			window.addEventListener("beforeunload", e => {
-				if (active) return
-				ws.close() // Force logout
-			})
-			ws.onerror = () => ws.close()
-			// Setup normal message response handling.
-			const onmessage = async m => {
-				let id = null, v = null
-				if (m.data instanceof Blob) {
-					id = Number(await m.data.slice(0, 1).text())
-					v = await m.data.slice(1)
-				}
-				// Send data to xtermjs or close.
-				if (id === 1) onTermMsg(new Uint8Array(await v.arrayBuffer()))
-				else onTermMsg(null) // Close terminal.
-			}
-			// Process all websocket messages in an ordered background queue.
-			let msgQueue = Promise.resolve()
-			ws.onmessage = m => msgQueue = msgQueue.then(() => onmessage(m)
-			)
-			// Set up the direct send route for key combo control sequence pass through.
-			this.#send = k => ws.send(k)
-			// Set up terminal messaging.
-			onTermMsg = m => {
-				if (m === null) {
-					active = false
-					// Close terminal.
-					term.dispose()
-					onTermMsg = m => { }
-					this.#send = k => { }
-					window.onresize = null
-					location.reload(true)
-				}
-				else term.write(m)
-			}
-			// Start streaming terminal input etc.
-			term.onData(d => {ws.send(new Blob([d]))})
-			// Send start-session message.
-			ws.send(JSON.stringify({rows: -1}))
-			this.#resize()
-			document.querySelector("#render").style.visibility = "visible"
-			term.focus()
-		}
-	}
-</script>
-
-<!--
-	-- warn
-	--
-	-- Pop-up prompt for warnings.
-	-->
-<style nonce="{{.Nonce}}">
-	#pop {
-		position: fixed;
-		z-index: 99;
-		backdrop-filter: blur(18px);
-		-webkit-backdrop-filter: blur(18px);
-		background-color: rgba(255, 255, 255, 0.2);
-		width: 100vw;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		text-align: center;
-		white-space: pre-line;
-
-		button {
-			font-size: 1.6em;
-			border-style: solid;
-			border-color: currentColor;
-			float: right;
-			margin: 5px;
-			background-color: background;
-		}
-
-		* {
-			font-family: system-ui, NotoMonoNerd;
-		}
-	}
-</style>
-<template id=-prompt>
-	<div id=pop>
-		<h1></h1>
-		<p></p>
-		<button id=ok>OK</button>
-	</div>
-</template>
-<script nonce="{{.Nonce}}">
-	"use strict"
-	async function warn(msg) {
-		const el = document.getElementById("-prompt").content.cloneNode(true).querySelector("#pop")
-		el.querySelector("h1").textContent = msg.substr(0, msg.indexOf("\n"))
-		el.querySelector("p").textContent = msg.substr(msg.indexOf("\n") + 1)
-		document.body.appendChild(el)
-		el.querySelector("#ok").focus()
-		await new Promise(ok => el.querySelector("#ok").onclick = () => ok())
-		document.body.removeChild(el)
-	}
-</script>
+</html>
