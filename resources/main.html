@@ -340,6 +340,16 @@
 							return false
 						}
 					}
+					// Browser shortcut management.
+					// Prevent as many browser shortcuts as possible when:
+					//   - the mouse is over the terminal and,
+					//   - text isn't selected (by the browser - to allow copy shortcut).
+					//   - the key isn't "V" (to allow typical paste shortcut)
+					// Note that browsers will not repect this for some reserved shortcuts,
+					// and this varies by browser.
+					if (terminal.matches(':hover') && !term.hasSelection() && e.key != "v") {
+						e.preventDefault()
+					}
 				})
 			}
 

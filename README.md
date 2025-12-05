@@ -16,6 +16,7 @@ The whisper thin SSH portal for terminal access in your browser!
 * 🎨 Beautiful Alacritty color theme.
 * 🖍️ Double Click, Triple Click, Shift+Drag and Shift+Alt+Drag selection controls.
 * 📋 Intuitive copy and paste controls, in harmony with sending interrupts.
+* ⌨️ Keyboard capture with mouse-over, including full-capture in browser app mode.
 * 💪 Hardened security.
 * 🔑 Supports Strict Host Key Checking.
 * 🔒 Authentication via SSH user account credentials, with optional support for 2FA.
