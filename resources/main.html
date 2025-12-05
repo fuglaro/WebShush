@@ -331,8 +331,13 @@
 						else return false
 					}
 					// Key sequence pass throughs
-					const comboKeys = {"1000Tab": "\x1b\t"}
 					if (e.type == "keydown") {
+						// Keyboard control sequences.
+						// Override xtermjs' defaults with a partial implementation of
+						// Kitty's keyboard protocol (https://sw.kovidgoyal.net/kitty/keyboard-protocol)
+						const comboKeys = {
+							"1000Tab": "\x1b\t",
+						}
 						const combo = [+e.altKey, +e.ctrlKey, +e.metaKey, +e.shiftKey, e.code].join('')
 						const comboKey = comboKeys[combo]
 						if (comboKey) {
