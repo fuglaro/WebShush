@@ -274,6 +274,7 @@
 			constructor() {
 				// Set up the terminal.
 				const terminal = document.querySelector("#render")
+				var hadSelection = false
 				// Disable the browser context menu.
 				terminal.oncontextmenu = () => false
 				// Set the terminal theme.
@@ -311,7 +312,8 @@
 					// Resize the terminal pty session to the new rows and columns size.
 					this.#send(JSON.stringify({cols: term.cols, rows: term.rows}))
 				}
-				// Fix Copy / Paste behaviour and Zoom.
+				// Set up to fix Copy / Paste behaviour.
+				term.onSelectionChange(() => hadSelection = true)
 				term.attachCustomKeyEventHandler(e => {
 					active = true
 					// Handle font size controls.
@@ -330,11 +332,16 @@
 					// by bypassing sending keys to the terminal until a normal
 					// key-up even occurs, clearing the selection after any
 					// potential copy event.
-					if (term.hasSelection()) {
-						if (e.type == "keyup"
-							&& e.key != "Shift" && e.key != "Alt" && e.key != "Control")
+					if (hadSelection) {
+						// Bypass until we get a non-selection-modifier key-up.
+						if (e.type != "keyup" || e.key == "Shift" || e.key == "Alt" || e.key == "Control") {
+							return false
+						} else {
+							// If we get a non-selection-modifier key-up we can assume any copy
+							// has already taken place.
 							term.clearSelection()
-						else return false
+							hadSelection = false
+						}
 					}
 					// Key sequence pass throughs
 					if (e.type == "keydown") {
