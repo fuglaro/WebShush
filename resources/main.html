@@ -65,6 +65,7 @@
 			}
 
 			div {
+				background-color: background;
 				display: flex;
 				width: 100vw;
 				height: 100vh;
@@ -157,6 +158,7 @@
 		const login = () => {
 			if (!document.querySelector("login-form") && crossOriginIsolated)
 				document.body.appendChild(document.createElement("login-form"))
+			document.querySelector("login-form").style.visibility = "visible"
 		}
 		customElements.define("login-form", class extends HTMLElement {
 			constructor() {
@@ -167,7 +169,6 @@
 			}
 			connectedCallback() {
 				if (!this.shadowRoot) return
-				const xterm = new XTerm
 				const loadURL = url => {
 					// Update the form with URL parameter info on load.
 					for (const [key, value] of new URL(url).searchParams.entries()) {
@@ -179,6 +180,7 @@
 				loadURL(window.location)
 				// Hook up the login form submission process.
 				this.shadowRoot.querySelector("form").addEventListener("submit", e => {
+					e.preventDefault()
 					// Saving updated form (safe) connection parameters to url.
 					const saveURL = () => {
 						var url = new URL(window.location)
@@ -194,7 +196,6 @@
 					}
 					saveURL()
 					this.shadowRoot.querySelector("button").classList.add("loading")
-					e.preventDefault()
 					// Establish WebSocket connection.
 					fetch("/preconnect").then(() => {
 						const ws = new WebSocket(`wss://${window.location.host}/connect`)
@@ -229,7 +230,8 @@
 								"Someone could be eavesdropping on you right now\n" +
 								"(with an adversary-in-the-middle attack)!\n" +
 								"It is also possible that a host key has just been changed.")
-							location.reload(true)
+							login()
+
 						}
 						ws.onclose = () => msgQueue = msgQueue.then(() => onclose())
 						ws.onerror = () => msgQueue = msgQueue.then(() => onclose())
@@ -246,10 +248,11 @@
 							saveURL()
 							// Validate then send connection to the XTerm.
 							if (hostkeyfail) return
-							xterm.connect(ws)
+							(new XTerm).connect(ws)
 						}
-						document.body.removeChild(document.querySelector("login-form"))
-					}).catch(() => location.reload())
+						document.querySelector("login-form").style.visibility = "hidden"
+						this.shadowRoot.querySelector("button").classList.remove("loading")
+					}).catch(() => login())
 				})
 				if (!this.shadowRoot.querySelector("#username").value)
 					this.shadowRoot.querySelector("#username").focus()
@@ -379,11 +382,13 @@
 				var onTermMsg = m => { }
 				ws.onclose = () => {
 					active = false
-					// close terminal if open.
-					onTermMsg(null)
+					// Close terminal.
+					term.dispose()
 					onTermMsg = m => { }
+					this.#send = k => { }
+					window.onresize = null
 					// Trigger a re-login prompt.
-					location.reload(true)
+					login()
 				}
 				window.addEventListener("beforeunload", e => {
 					if (active) return
@@ -409,15 +414,7 @@
 				this.#send = k => ws.send(k)
 				// Set up terminal messaging.
 				onTermMsg = m => {
-					if (m === null) {
-						active = false
-						// Close terminal.
-						term.dispose()
-						onTermMsg = m => { }
-						this.#send = k => { }
-						window.onresize = null
-						location.reload(true)
-					}
+					if (m === null) ws.close()
 					else term.write(m)
 				}
 				// Start streaming terminal input etc.
