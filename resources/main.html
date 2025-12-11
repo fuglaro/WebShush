@@ -321,7 +321,7 @@
 					// while ignoring null selection change events like when mouse mode activates,
 					// and term.hasSelection can't be trusted when in mouse mode, even though the
 					// window does have a selection ready to be copied.
-					hadSelection = Boolean(window.getSelection())
+					hadSelection = Boolean(window.getSelection().toString().length)
 				})
 				term.attachCustomKeyEventHandler(e => {
 					active = true
