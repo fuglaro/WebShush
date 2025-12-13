@@ -7,6 +7,7 @@ import (
 	"embed"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -144,6 +145,7 @@ func connect(w http.ResponseWriter, r *http.Request) {
 	hash := hmac.New(sha256.New, privateKey)
 	hash.Write(csrf)
 	if !hmac.Equal([]byte(csrfhash), hash.Sum(nil)) {
+		checkInWS(c, &mutex, -99, errors.New("Invalid CSRFToken"))
 		return
 	}
 	// Authenticate and establish SSH connection.

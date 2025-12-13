@@ -219,8 +219,10 @@
 						const handshake = new Promise(ok => {
 							const onmessage = async m => {
 								const realkey = JSON.parse(m.data)
-								if (realkey["err"]) console.log(realkey["err"])
-								else if (realkey == "") {
+								if (realkey["err"]) {
+									console.log(realkey["err"])
+									if (realkey["err"] == "Invalid CSRFToken") location.reload(true)
+								} else if (realkey == "") {
 									hostkeyfail = true
 									ws.close()
 								} else {
