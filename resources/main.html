@@ -74,35 +74,51 @@
 				font-family: system-ui;
 			}
 
-			ul {
-				list-style: none;
-			}
+			form {
+				width: min(400px, 90%);
 
-			h1,
-			li {
-				margin: 3px;
-			}
+				ul {
+					list-style: none;
+					padding-inline-start: 10px;
 
-			label {
-				display: inline-block;
-				width: 80px;
-				text-align: right;
-			}
+					li {
+						display: flex;
+						flex-wrap: wrap;
+						margin: 5px;
 
-			input {
-				padding: 5px;
-			}
+						label {
+							padding: 5px;
+						}
 
-			button {
-				float: right;
-				font-size: 2em;
-				border-style: solid;
-				border-color: currentColor;
-				background-color: background;
-			}
+						input,
+						textarea {
+							flex-grow: 1;
+							padding: 5px;
+						}
 
-			button.loading {
-				filter: blur(3px);
+						#code {
+							flex-grow: 0;
+							width: 4em;
+						}
+
+						#shell {
+							text-wrap: wrap;
+							max-height: 8lh;
+						}
+					}
+				}
+
+				button {
+					float: right;
+					font-size: 2em;
+					border-style: solid;
+					border-color: currentColor;
+					background-color: background;
+				}
+
+				button.loading {
+					filter: blur(3px);
+				}
 			}
 		</style>
 		<div tabindex="-1">
@@ -116,11 +132,9 @@
 					<li>
 						<label for=password>password</label>
 						<input type=password id=password name=password autocomplete=current-password required>
-					</li>
-					<li>
-						<label for=code></label>
-						<input type=text id=code name=code title="2FA access code (optional on some servers)" size=6
-							autocomplete="off" placeholder="### ###">
+						<label for=code style="display: none;"></label>
+						<input type=text id=code name=code title="2FA access code (optional on some servers)" autocomplete="off"
+							placeholder="### ###">
 					</li>
 					<li>
 						<label for=hostkey>hostkey</label>
@@ -128,7 +142,7 @@
 					</li>
 					<li>
 						<label for=shell>shell</label>
-						<input type=text id=shell name=shell placeholder=default>
+						<textarea id=shell rows=4 name=shell placeholder=default></textarea>
 					</li>
 				</ul>
 				<button>Connect</button>
@@ -173,7 +187,7 @@
 					// Update the form with URL parameter info on load.
 					for (const [key, value] of new URL(url).searchParams.entries()) {
 						const el = this.shadowRoot.querySelector("#" + key)
-						if (el && el.nodeName == "INPUT") el.value = value
+						if (el && (el.nodeName == "INPUT" || el.nodeName == "TEXTAREA")) el.value = value
 					}
 				}
 				window.onpopstate = (e) => loadURL(e.state)
@@ -184,7 +198,7 @@
 					// Saving updated form (safe) connection parameters to url.
 					const saveURL = () => {
 						var url = new URL(window.location)
-						this.shadowRoot.querySelectorAll("input").forEach(i => {
+						this.shadowRoot.querySelectorAll("input, textarea").forEach(i => {
 							if (i.id == "CSRFToken") return
 							if (i.id == "password") return
 							if (i.id == "code") return
