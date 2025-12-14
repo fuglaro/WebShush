@@ -1,5 +1,5 @@
-builds/*
-resources/deps
+builds/**
+frontend/deps
 **.DS_Store
 **.key
 **.csr
@@ -7,4 +7,3 @@ resources/deps
 **.cert
 **.pem
 **.p12
-webshush

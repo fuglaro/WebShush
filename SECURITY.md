@@ -50,7 +50,7 @@ Since this service proxies SSH credentials, and streams personal data, hardened 
 * The backend requires the browser to provide Secure Fetch Metadata Request Headers, and denies access to content unless the following policies are met:
   * For the main page:
     * The request destination is a document, preventing embedding.
-  * For the `/resources/` URL path:
+  * For frontend resources under the `/` URL path:
     * The request site is same-origin.
     * The request destination is a script, style or font element.
   * For the `/preconnect` endpoint:

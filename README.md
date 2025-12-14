@@ -1,4 +1,4 @@
-# ![](favicon.ico) WebShush
+# ![](frontend/favicon.ico) WebShush
 
 The whisper thin SSH portal for terminal access in your browser!
 
@@ -29,17 +29,17 @@ The whisper thin SSH portal for terminal access in your browser!
 * Ensure you have golang on your mac or linux machine.
 * Add remaining dependencies and build:
 ```bash
-./build
+./buildme
 ```
 You can also create fully self contained executables for all supported platforms
-with `./build release`.
+with `./buildme release`.
 
 ### Install
 * Ensure your machine allows ssh from localhost.
 * Setup a certficate for TLS and ensure your browser respects it.
 * Start server:
 ```bash
-WEBSHUSH_CERT_FILE=my.crt WEBSHUSH_KEY_FILE=my.key ./webshush
+WEBSHUSH_CERT_FILE=my.crt WEBSHUSH_KEY_FILE=my.key builds/webshush
 ```
 * Open in your browser. Eg: `https://localhost/`
 
@@ -76,7 +76,7 @@ flowchart LR
 The code is organised across a minimal number files as a result of a heavily opinionated focus
 on simplicity through reducing the complexities of code interconnectivity:
 * [main.go](main.go) - the primary server.
-* [resources/main.html](resources/main.html) - the main frontend browser page.
+* [frontend/index.html](frontend/index.html) - the main frontend browser page.
 
 No frontend framework is used because adopting one on top of the simple interface design
 would have introduced unjustified complexity.
@@ -98,7 +98,7 @@ Nothing is secure until it is audited and reviewed by peers.
 # Wish List for Future Work
 * Support remote terminal commands sending clipboard events (ANSI OSC 52 support) - due in xtermjs 6.0.0 milestone (https://github.com/xtermjs/xterm.js/issues/3260).
 * Kitty Control Sequence Protocol xtermjs addon (https://sw.kovidgoyal.net/kitty/keyboard-protocol).
-* Electron app builds.
+* Wails app builds.
 
 # Thanks to
 We stand on the shoulders of giants. They own this, far more than I do.

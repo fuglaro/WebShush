@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"log"
 	"net"
 	"net/http"
@@ -27,8 +28,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-//go:embed resources
-//go:embed favicon.ico
+//go:embed frontend
 var res embed.FS
 
 var version string
@@ -466,70 +466,73 @@ VERSION: ` + version + "\n")
 		})
 	})))
 
-	// The main page.
 	http.Handle("/", SMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Ensure Secure Fetch Metadata validity.
-		if r.Header.Get("Sec-Fetch-Dest") != "document" {
-			http.Error(w, "Invalid Secure Fetch Metadata", http.StatusForbidden)
-			return
+		if r.URL.Path == "/" {
+			// The main page.
+			// Ensure Secure Fetch Metadata validity.
+			if r.Header.Get("Sec-Fetch-Dest") != "document" {
+				http.Error(w, "Invalid Secure Fetch Metadata", http.StatusForbidden)
+				return
+			}
+			// Set up security cookies.
+			nonceb := make([]byte, 128/8)
+			_, err = rand.Read(nonceb)
+			if check(w, err) {
+				return
+			}
+			nonce := base64.URLEncoding.EncodeToString(nonceb)
+			w.Header().Set("Content-Security-Policy", "sandbox allow-downloads allow-forms "+
+				"allow-same-origin allow-scripts allow-modals; "+
+				"default-src 'none'; frame-ancestors 'none'; "+
+				"form-action 'none'; img-src 'self'; media-src 'self'; font-src 'self'; "+
+				"connect-src 'self'; style-src-elem 'self' 'unsafe-inline'; "+
+				"style-src-attr 'unsafe-inline'; style-src 'self'; "+
+				"script-src-elem 'self' 'nonce-"+nonce+"';")
+			w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
+			w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
+			w.Header().Set("Referrer-Policy", "same-origin")
+			t, err := template.ParseFS(res, "frontend/index.html")
+			if check(w, err) {
+				return
+			}
+			// Prepare a Singed Double Submit Cookie CSRF Token.
+			var hashData = make([]byte, 512/8)
+			_, err = rand.Read(hashData)
+			if err != nil {
+				log.Fatal("Failed to generate cryptographically secure CSRF random identifier.")
+				return
+			}
+			hash := hmac.New(sha256.New, privateKey)
+			hash.Write(hashData)
+			http.SetCookie(w, &http.Cookie{
+				Name:     "__Host-CSRFToken",
+				Value:    base64.URLEncoding.EncodeToString(hash.Sum(nil)),
+				Path:     "/",
+				Secure:   true,
+				HttpOnly: true,
+				SameSite: http.SameSiteStrictMode,
+			})
+			w.Header().Set("Cache-Control", "no-cache")
+			// Resolve template and send.
+			t.Execute(w, struct {
+				Nonce string
+				CSRF  string
+			}{Nonce: nonce, CSRF: base64.URLEncoding.EncodeToString(hashData)})
+		} else {
+			// Page resources.
+			// Ensure Secure Fetch Metadata validity.
+			if r.URL.Path != "/favicon.ico" && (r.Header.Get("Sec-Fetch-Site") != "same-origin" ||
+				(r.Header.Get("Sec-Fetch-Dest") != "script" &&
+					r.Header.Get("Sec-Fetch-Dest") != "style" &&
+					r.Header.Get("Sec-Fetch-Dest") != "font")) {
+				http.Error(w, "Invalid Secure Fetch Metadata", http.StatusForbidden)
+				return
+			}
+			// Serve the frontend dependencies.
+			var fend, _ = fs.Sub(res, "frontend")
+			http.FileServerFS(fend).ServeHTTP(w, r)
 		}
-		// Set up security cookies.
-		nonceb := make([]byte, 128/8)
-		_, err = rand.Read(nonceb)
-		if check(w, err) {
-			return
-		}
-		nonce := base64.URLEncoding.EncodeToString(nonceb)
-		w.Header().Set("Content-Security-Policy", "sandbox allow-downloads allow-forms "+
-			"allow-same-origin allow-scripts allow-modals; "+
-			"default-src 'none'; frame-ancestors 'none'; "+
-			"form-action 'none'; img-src 'self'; media-src 'self'; font-src 'self'; "+
-			"connect-src 'self'; style-src-elem 'self' 'unsafe-inline'; "+
-			"style-src-attr 'unsafe-inline'; style-src 'self'; "+
-			"script-src-elem 'self' 'nonce-"+nonce+"';")
-		w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
-		w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
-		w.Header().Set("Referrer-Policy", "same-origin")
-		t, err := template.ParseFS(res, "resources/main.html")
-		if check(w, err) {
-			return
-		}
-		// Prepare a Singed Double Submit Cookie CSRF Token.
-		var hashData = make([]byte, 512/8)
-		_, err = rand.Read(hashData)
-		if err != nil {
-			log.Fatal("Failed to generate cryptographically secure CSRF random identifier.")
-			return
-		}
-		hash := hmac.New(sha256.New, privateKey)
-		hash.Write(hashData)
-		http.SetCookie(w, &http.Cookie{
-			Name:     "__Host-CSRFToken",
-			Value:    base64.URLEncoding.EncodeToString(hash.Sum(nil)),
-			Path:     "/",
-			Secure:   true,
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		})
-		w.Header().Set("Cache-Control", "no-cache")
-		// Resolve template and send.
-		t.Execute(w, struct {
-			Nonce string
-			CSRF  string
-		}{Nonce: nonce, CSRF: base64.URLEncoding.EncodeToString(hashData)})
 	})))
-	http.Handle("/resources/", SMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Ensure Secure Fetch Metadata validity.
-		if r.Header.Get("Sec-Fetch-Site") != "same-origin" ||
-			(r.Header.Get("Sec-Fetch-Dest") != "script" &&
-				r.Header.Get("Sec-Fetch-Dest") != "style" &&
-				r.Header.Get("Sec-Fetch-Dest") != "font") {
-			http.Error(w, "Invalid Secure Fetch Metadata", http.StatusForbidden)
-			return
-		}
-		http.FileServerFS(res).ServeHTTP(w, r)
-	})))
-	http.Handle("/favicon.ico", SMW(http.FileServerFS(res)))
 
 	// Display final configuration information and then launch service.
 	fmt.Fprintf(os.Stderr, "WEBSHUSH_CERT_FILE=%v\n", cert)

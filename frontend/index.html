@@ -5,7 +5,7 @@
 	<meta charset=utf-8>
 	<meta name="viewport" content="initial-scale=1, user-scalable=0, interactive-widget=resizes-content">
 	<title>WebShuSH</title>
-	<link rel=stylesheet href="/resources/deps/xterm.css"
+	<link rel=stylesheet href="./deps/xterm.css"
 		integrity="sha384-LJcOxlx9IMbNXDqJ2axpfEQKkAYbFjJfhXexLfiRJhjDU81mzgkiQq8rkV0j6dVh">
 	<script nonce="{{.Nonce}}">
 		// Temporarily hide Macs from xtermjs loading to avoid it forcing Mac-style controls.
@@ -13,10 +13,10 @@
 		_plt = navigator.platform
 		navigator.__defineGetter__('platform', () => _plt.indexOf('Mac') == 0 ? 'nixLinux' : _plt)
 	</script>
-	<script src="/resources/deps/xterm.js"
+	<script src="./deps/xterm.js"
 		integrity="sha384-/nfmYPUzWMS6v2atn8hbljz7NE0EI1iGx34lJaNzyVjWGDzMv+ciUZUeJpKA3Glc"></script>
 	<script nonce="{{.Nonce}}">navigator.__defineGetter__('platform', () => _plt)</script>
-	<script src="/resources/deps/xterm-addon-fit.js"
+	<script src="./deps/xterm-addon-fit.js"
 		integrity="sha384-AQLWHRKAgdTxkolJcLOELg4E9rE89CPE2xMy3tIRFn08NcGKPTsELdvKomqji+DL"></script>
 
 	<!--
@@ -29,7 +29,7 @@
 
 		@font-face {
 			font-family: NotoMonoNerd;
-			src: url("/resources/NotoMonoNerdFontMono-Regular.ttf");
+			src: url("./NotoMonoNerdFontMono-Regular.ttf");
 		}
 
 		body {
