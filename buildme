@@ -26,7 +26,7 @@ if [[ "$1" == "release" ]]; then
   echo
   echo "RELEASE: $VER"
   echo "===================="
-  ls -1 builds/webshush-*
+  ls -1 builds/arch/webshush-*
 fi
 
 # Standard build
